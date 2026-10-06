@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Home visual directions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Mukta:wght@400;500;600&family=Anek+Latin:wdth,wght@75..125,400..800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#E7E6E2;color:#1b1b1b;font-family:'IBM Plex Sans',system-ui,sans-serif}
+.wrap{max-width:1360px;margin:0 auto;padding:40px 24px 80px}
+.top h1{font-size:30px;font-weight:600;margin:0 0 6px;letter-spacing:-.01em}
+.top p{margin:0;color:#5b5b58;max-width:760px;line-height:1.55}
+.dir{margin:44px 0;padding:24px;border-radius:28px;background:var(--page)}
+.dir-head{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:28px;align-items:start}
+.eyebrow{font:600 12px 'IBM Plex Sans';letter-spacing:.08em;text-transform:uppercase;color:var(--text2);margin:0 0 6px}
+.dname{margin:0 0 8px;font-family:var(--display);color:var(--text);font-size:34px;line-height:1.1;font-weight:var(--dw)}
+.dline{margin:0 0 14px;color:var(--text2);font-family:var(--body);font-size:16px;line-height:1.5}
+.sw{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}
+.sw div{width:84px;font:500 11px 'IBM Plex Sans';color:var(--text2)}
+.sw span{display:block;height:40px;border-radius:8px;margin-bottom:4px;border:1px solid rgba(0,0,0,.08)}
+.spec{background:var(--surface);border:1px solid var(--line);border-radius:var(--card-r);padding:14px 16px;font-family:var(--body);color:var(--text)}
+.spec .a{font-family:var(--display);font-size:26px;line-height:1.15;font-weight:var(--dw);margin:0 0 4px}
+.spec .b{font-size:14px;color:var(--text2);margin:0}
+.spec .c{font-size:12px;color:var(--text2);margin:8px 0 0}
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.phones{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-top:28px}
+.ph{justify-self:center}
+.frame{width:300px;height:640px;border-radius:42px;padding:9px;background:#111}
+.cap{text-align:center;font:500 13px 'IBM Plex Sans';color:var(--text2);margin-top:10px}
+.screen{width:100%;height:100%;border-radius:34px;overflow:hidden;position:relative;display:flex;flex-direction:column;background:var(--bg);color:var(--text);font-family:var(--body),system-ui,sans-serif;font-size:13px}
+.sb{flex:0 0 30px;display:flex;justify-content:space-between;align-items:center;padding:0 22px;font:600 11px 'IBM Plex Sans';color:var(--sbc,var(--text))}
+.hdr{padding:6px 16px 10px}
+.hdr h3{margin:0;font-family:var(--display)}
+.hdr .sub{margin:2px 0 0;color:var(--text2)}
+.loc{display:flex;gap:6px;align-items:center;margin-top:8px;color:var(--text2);font-size:12px}
+.loc i{font-size:15px}
+.tog{display:flex;margin-top:10px}
+.tog span{flex:1;display:flex;gap:6px;justify-content:center;align-items:center;padding:7px 0;font-size:12px;font-weight:600}
+.mapw{position:relative;flex:1 1 auto;min-height:120px;overflow:hidden}
+.mapw svg{position:absolute;inset:0;width:100%;height:100%}
+.ring{position:absolute;left:50%;top:50%;width:88%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;border:1.5px dashed var(--ring);pointer-events:none}
+.you{position:absolute;width:15px;height:15px;border-radius:50%;background:var(--you);border:3px solid var(--youb,#fff);transform:translate(-50%,-50%);box-shadow:0 0 0 7px color-mix(in srgb,var(--you) 20%,transparent)}
+.mk{position:absolute;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center}
+.lower{background:var(--lowerbg,transparent)}
+.count{padding:10px 16px 0;font-size:12px;color:var(--text2)}
+.count b{color:var(--text)}
+.cta{margin:10px 16px 0;width:calc(100% - 32px);border:0;background:var(--primary);color:var(--onp);font:600 14px var(--body);padding:13px;display:flex;gap:8px;justify-content:center;align-items:center;border-radius:var(--btn-r);cursor:pointer}
+.cta i{font-size:18px}
+.sec{display:flex;flex-wrap:wrap;gap:4px 14px;padding:10px 16px 8px;font-size:12px;color:var(--text2)}
+.sec a{text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--line)}
+.nav{margin-top:auto;display:flex;border-top:1px solid var(--line);background:var(--surface);padding:8px 0 16px}
+.nav span{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--text2)}
+.nav span i{font-size:21px}
+.nav .on{color:var(--text);font-weight:600}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--sc,var(--s));line-height:1.2}
+.chip i{font-size:14px}
+.photo{background:var(--photo);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.8);position:relative;overflow:hidden;flex-shrink:0}
+.photo i{font-size:28px}
+.photo .pl{position:absolute;left:6px;bottom:4px;font:500 9px 'IBM Plex Sans';color:rgba(255,255,255,.7);letter-spacing:.04em}
+.sheet{background:var(--surface);position:relative;padding:14px 16px 12px}
+.sheet .t{font-family:var(--display);margin:0}
+.meta{color:var(--text2);font-size:12px;margin:2px 0 0}
+.btnp{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:0;background:var(--primary);color:var(--onp);font:600 14px var(--body);padding:12px;border-radius:var(--btn-r);margin-top:12px}
+.btns{display:flex;gap:8px;margin-top:8px}
+.btns span{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;border:1px solid var(--line);border-radius:var(--btn-r);font-weight:600;font-size:13px;color:var(--text);background:var(--surface)}
+.list{flex:1 1 auto;overflow:hidden}
+.card{background:var(--surface);position:relative}
+.card .t{font-family:var(--display);margin:0;font-weight:600}
+.card .act{margin-top:8px}
+.card .act .btnp{margin-top:0;padding:10px;font-size:13px}
+.card .act .ghost{display:inline-flex;align-items:center;gap:6px;font-weight:600;color:var(--text);font-size:13px}
+.empty{padding:14px 20px 0;text-align:center}
+.empty .h{font-family:var(--display);font-size:17px;margin:0 0 4px;color:var(--text)}
+.empty p{margin:0;color:var(--text2)}
+.mkleg{display:flex;flex-wrap:wrap;gap:22px;align-items:center;margin-top:14px;padding:14px 18px;border-radius:var(--card-r);background:var(--mapbg)}
+.mkleg .it{position:relative;width:46px;height:46px}
+.mkleg .it .mk{left:50%;top:50%}
+.note{margin-top:18px;font-size:13px;color:var(--text2);font-family:var(--body);line-height:1.5}
+.cmp{margin-top:40px;background:#fff;border-radius:20px;padding:24px}
+.cmp table{width:100%;border-collapse:collapse;font-size:14px}
+.cmp td,.cmp th{border-bottom:1px solid #e6e4df;padding:10px 8px;text-align:left;vertical-align:top}
+.cmp th{font-weight:600}
+
+.d1{--page:#F1F2F0;--bg:#F5F6F4;--surface:#FFFFFF;--surface2:#E9ECEA;--text:#121619;--text2:#55606A;--line:#D8DDDA;--primary:#0F4C5C;--onp:#FFFFFF;--display:'IBM Plex Sans';--body:'IBM Plex Sans';--dw:600;--btn-r:8px;--card-r:10px;--photo:linear-gradient(140deg,#9AA3A8,#5B656C);--mapbg:#E5E9E5;--road:#FFFFFF;--major:#FBFAF4;--water:#CFDCE0;--park:#D7E3D2;--ring:#9AA6AC;--you:#0F4C5C}
+.d1 .hdr{background:var(--surface);border-bottom:1px solid var(--line)}
+.d1 .hdr h3{font-size:21px;font-weight:600;letter-spacing:-.01em}
+.d1 .tog{background:var(--surface2);border-radius:9px;padding:3px}
+.d1 .tog span{border-radius:7px;color:var(--text2)}
+.d1 .tog .on{background:var(--surface);color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.1)}
+.d1 .mk{width:28px;height:28px;border-radius:50%;background:var(--s);color:#fff;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.28);font-size:15px}
+.d1 .mk.s-help{width:36px;height:36px;font-size:19px;box-shadow:0 0 0 6px color-mix(in srgb,var(--s) 22%,transparent),0 1px 3px rgba(0,0,0,.3)}
+.d1 .mk.sel{outline:3px solid var(--text);outline-offset:2px}
+.d1 .chip{text-transform:uppercase;letter-spacing:.04em;padding:4px 8px 4px 6px;background:color-mix(in srgb,var(--s) 10%,#fff);border-left:3px solid var(--s);border-radius:2px;font-size:10.5px}
+.d1 .sheet{border-radius:16px 16px 0 0;box-shadow:0 -4px 18px rgba(0,0,0,.12);border-top:1px solid var(--line)}
+.d1 .sheet .row{display:flex;gap:12px}
+.d1 .sheet .photo{width:76px;height:76px;border-radius:8px}
+.d1 .sheet .t{font-size:17px;font-weight:600}
+.d1 .sheet .chip{margin-top:8px}
+.d1 .lower{background:var(--surface);border-top:1px solid var(--line)}
+.d1 .card{display:flex;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.d1 .card .photo{width:64px;height:64px;border-radius:8px}
+.d1 .card .t{font-size:15px}
+.d1 .card .chip{margin-top:6px}
+.d1 .cardw{flex:1;min-width:0}
+.d1 .ctapin{background:var(--surface);padding-bottom:12px;border-bottom:1px solid var(--line)}
+.d1 .ctapin .cta{margin-top:12px}
+
+.d2{--page:#EFE8DD;--bg:#F4EEE5;--surface:#FBF8F2;--surface2:#EDE4D6;--text:#2A221C;--text2:#7A6C5F;--line:#E3D8C8;--primary:#2E5A4B;--onp:#FBF8F2;--display:'Fraunces';--body:'Mukta';--dw:500;--btn-r:14px;--card-r:18px;--photo:radial-gradient(circle at 32% 28%,#E9C49A,#A9764C 58%,#6F4B31);--mapbg:#ECE3D2;--road:#F8F2E6;--major:#FFFBF3;--water:#D6DCD2;--park:#DCDCC3;--ring:#C7B596;--you:#2E5A4B;--youb:#FBF8F2}
+.d2 .screen{font-size:14px}
+.d2 .hdr{padding:10px 20px 6px}
+.d2 .hdr h3{font-size:29px;line-height:1.08;font-weight:500;letter-spacing:-.015em}
+.d2 .hdr .sub{font-family:'Fraunces';font-style:italic;font-size:15px}
+.d2 .loc{font-size:13px}
+.d2 .tog{gap:20px;margin-top:12px;justify-content:flex-start}
+.d2 .tog span{flex:0 0 auto;padding:4px 0;border-bottom:2px solid transparent;color:var(--text2);font-weight:500;font-size:14px}
+.d2 .tog .on{border-color:var(--text);color:var(--text)}
+.d2 .mapw{margin:6px 14px 0;border-radius:24px}
+.d2 .mk{width:46px;height:46px;border-radius:50%;border:3px solid var(--s);background:var(--photo);box-shadow:0 6px 14px rgba(70,45,20,.28)}
+.d2 .mk>i{position:absolute;right:-5px;bottom:-5px;width:21px;height:21px;border-radius:50%;background:var(--s);color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;border:2px solid var(--surface)}
+.d2 .mk.s-help{width:56px;height:56px}
+.d2 .mk.sel{outline:3px solid var(--text);outline-offset:3px}
+.d2 .chip{padding:4px 11px 4px 9px;border-radius:999px;background:color-mix(in srgb,var(--s) 14%,var(--surface));font-weight:500;font-size:12.5px}
+.d2 .count{padding:12px 20px 0;font-size:13px}
+.d2 .cta{margin:10px 16px 0;font-weight:500;font-size:16px;padding:15px}
+.d2 .sec{padding:12px 20px 8px;font-size:13px}
+.d2 .sheet{margin:-22px 0 0;border-radius:28px 28px 0 0;padding:12px 16px 14px;box-shadow:0 -10px 30px rgba(70,45,20,.18)}
+.d2 .sheet .photo{height:104px;border-radius:18px}
+.d2 .sheet .t{font-size:22px;font-weight:500;margin-top:10px}
+.d2 .sheet .chip{margin-top:8px}
+.d2 .btnp{font-weight:500;font-size:16px;padding:14px}
+.d2 .btns span{font-weight:500}
+.d2 .list{padding:0 14px}
+.d2 .card{border-radius:22px;margin-top:14px;padding:10px 10px 14px;border:1px solid var(--line)}
+.d2 .card .photo{height:128px;border-radius:16px}
+.d2 .card .cardw{padding:10px 6px 0}
+.d2 .card .t{font-size:20px;font-weight:500}
+.d2 .card .chip{margin-top:8px}
+.d2 .ctapin .cta{margin-top:6px}
+.d2 .empty .h{font-size:22px;font-weight:500}
+
+.d3{--page:#E6E8EC;--bg:#0D141D;--surface:#FFFFFF;--surface2:#EEF0F3;--text:#0A0E13;--text2:#5A6472;--line:#DCE0E6;--primary:#1D3EE8;--onp:#FFFFFF;--display:'Anek Latin';--body:'Anek Latin';--dw:700;--btn-r:5px;--card-r:8px;--photo:linear-gradient(135deg,#46536A,#18202D);--mapbg:#0F1822;--road:#1B2633;--major:#2A3A4E;--water:#0A1F2E;--park:#11241D;--ring:#3D6BFF;--you:#7EB0FF;--youb:#0D141D;--sbc:#E8EDF4;--lowerbg:#FFFFFF}
+.d3 .screen{font-variation-settings:'wdth' 100}
+.d3 .hdr{background:#0D141D;color:#F2F5F9;padding:4px 16px 12px}
+.d3 .hdr h3{font-size:24px;font-weight:750;font-variation-settings:'wdth' 112;letter-spacing:-.01em}
+.d3 .hdr .sub{color:#8C99AB}
+.d3 .loc{color:#B6C1CF;font-variation-settings:'wdth' 90;letter-spacing:.02em}
+.d3 .tog{border:1px solid #2A3646;border-radius:5px;padding:2px}
+.d3 .tog span{color:#8C99AB;border-radius:3px;font-weight:650;letter-spacing:.03em}
+.d3 .tog .on{background:#F2F5F9;color:#0A0E13}
+.d3 .mk{width:26px;height:26px;transform:translate(-50%,-50%) rotate(45deg);background:var(--s);border-radius:4px;color:#fff;font-size:14px;border:2px solid #0D141D}
+.d3 .mk>i{transform:rotate(-45deg)}
+.d3 .mk.s-help{width:33px;height:33px;font-size:16px;box-shadow:0 0 0 5px rgba(232,51,63,.28),0 0 0 11px rgba(232,51,63,.12)}
+.d3 .mk.s-reaching{color:#14100A}
+.d3 .mk.sel{outline:2px solid #fff;outline-offset:3px}
+.d3 .chip{background:var(--s);color:#fff;padding:4px 8px;border-radius:3px;font-weight:700;letter-spacing:.03em;font-size:11px;text-transform:uppercase;font-variation-settings:'wdth' 92}
+.d3 .chip.s-reaching{color:#14100A}
+.d3 .lower{border-top:3px solid var(--primary)}
+.d3 .count{padding:12px 16px 0;display:flex;align-items:baseline;gap:8px;color:var(--text2)}
+.d3 .count b{font-size:30px;font-weight:800;font-variation-settings:'wdth' 85;line-height:1}
+.d3 .cta{font-weight:700;letter-spacing:.01em;font-size:15px}
+.d3 .nav{border-top:1px solid var(--line)}
+.d3 .sheet{border-radius:12px 12px 0 0;border-top:4px solid var(--s);padding:14px 16px 12px}
+.d3 .sheet .row{display:flex;gap:12px;padding-right:74px}
+.d3 .sheet .photo{width:70px;height:70px;border-radius:5px}
+.d3 .sheet .t{font-size:19px;font-weight:750;font-variation-settings:'wdth' 108}
+.d3 .sheet .dist{position:absolute;right:16px;top:14px;font-size:30px;font-weight:800;font-variation-settings:'wdth' 82;line-height:1}
+.d3 .sheet .chip{margin-top:8px}
+.d3 .data{display:flex;gap:16px;margin-top:10px;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--text2);font-variation-settings:'wdth' 90}
+.d3 .data b{display:block;font-size:13px;color:var(--text);letter-spacing:0;text-transform:none;font-weight:650}
+.d3 .listw{background:#EEF0F3;flex:1 1 auto;display:flex;flex-direction:column;overflow:hidden}
+.d3 .card{display:flex;gap:12px;padding:12px 14px 12px 16px;margin:8px 10px 0;border-radius:6px;border-left:4px solid var(--s)}
+.d3 .card .photo{width:58px;height:58px;border-radius:4px}
+.d3 .card .t{font-size:16px;font-weight:750;font-variation-settings:'wdth' 106}
+.d3 .card .dist{position:absolute;right:14px;top:12px;font-size:20px;font-weight:800;font-variation-settings:'wdth' 84}
+.d3 .card .chip{margin-top:6px}
+.d3 .cardw{flex:1;min-width:0}
+.d3 .card .t,.d3 .card>.cardw>.meta{padding-right:52px}
+.d3 .ctapin{background:#0D141D;padding:0 0 12px}
+.d3 .ctapin .cta{margin-top:0}
+.d3 .empty{background:#fff}
+.d3 .empty .h{font-weight:750;font-variation-settings:'wdth' 106;font-size:19px}
+.d3 .sec{background:#fff}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="top">
+<h1>Home: three visual directions</h1>
+<p>Same product, same Home information architecture (wireframes/01-home.md H1, H2, H4, H5), three different design approaches. Photography is shown as placeholders with each direction's treatment; maps are illustrative, not a provider decision. Fictional Mumbai prototype content.</p>
+</div>
+<div id="dirs"></div>
+<div class="cmp">
+<table>
+<tr><th>Criteria</th><th>01 · Signal (civic)</th><th>02 · Kindred (warm)</th><th>03 · Pulse (bold)</th></tr>
+<tr><td>Trust</td><td>Very high: calm, legible, institutional without being bureaucratic</td><td>High: warmth builds personal trust; slightly less "operational"</td><td>High: confident and precise; the dark map must stay calm to avoid feeling like a tool for experts</td></tr>
+<tr><td>Emotional connection</td><td>Moderate: relies on content more than form</td><td>Very high: photography and serif voice carry compassion</td><td>Moderate: energy and momentum more than tenderness</td></tr>
+<tr><td>Emergency clarity</td><td>Very high: strongest status legibility and density</td><td>Good: photo-led cards are slower to scan; status pills are softer</td><td>Very high: strongest contrast, big distance numerals, unmistakable urgent marker</td></tr>
+<tr><td>Modernity</td><td>Good: contemporary but restrained</td><td>Good: editorial and premium rather than "tech"</td><td>Very high: most contemporary and distinctive</td></tr>
+<tr><td>Portfolio impact</td><td>Solid: shows rigour and systems thinking; less visually memorable</td><td>Strong: beautiful hero shots; risk of looking like a lifestyle app</td><td>Strong: most memorable hero screen; must prove it stays humane</td></tr>
+<tr><td>Scalability</td><td>Very high: simple tokens, easy dashboard/admin reuse</td><td>Moderate: serif + photo-led layouts harder to apply to dense dashboard screens</td><td>High: sharp tokens scale well; dark map/light panel split needs care across screens</td></tr>
+</table>
+</div>
+</div>
+<script>
+const ST={
+ help:{l:'Looking for help',i:'ti-urgent'},
+ accepted:{l:'Accepted by organisation',i:'ti-circle-check'},
+ reaching:{l:'Help reaching in ~8 min',i:'ti-clock'},
+ team:{l:'Rescue team reached',i:'ti-map-pin-check'},
+ hospital:{l:'Reaching hospital',i:'ti-ambulance'},
+ responder:{l:'Responder taking animal to hospital',i:'ti-route'}
+};
+const COL={
+ d1:{help:'#C21F32',accepted:'#2C5D8C',reaching:'#8A5A00',team:'#2E6B4F',hospital:'#3E5B83',responder:'#5C4A8C'},
+ d2:{help:'#A8322A',accepted:'#4C6A86',reaching:'#B07A1E',team:'#3F6B4E',hospital:'#5B6E8C',responder:'#7A5C8F'},
+ d3:{help:'#E8333F',accepted:'#1D3EE8',reaching:'#F2A900',team:'#0EA37F',hospital:'#1E9BE0',responder:'#8B5CF6'}
+};
+const CASES=[
+ {a:'Injured dog',r:'Hit by vehicle',loc:'Andheri East',d:'850 m',s:'help',t:'12 min ago',ic:'ti-dog',x:31,y:30},
+ {a:'Injured cat',r:'Bleeding or wound',loc:'Powai',d:'1.8 km',s:'reaching',t:'25 min ago',ic:'ti-cat',x:74,y:24},
+ {a:'Dog',r:"Can't walk or stand",loc:'Jogeshwari',d:'2.4 km',s:'responder',t:'40 min ago',ic:'ti-dog',x:68,y:72},
+ {a:'Cat',r:'Very sick or weak',loc:'Marol',d:'3.1 km',s:'accepted',t:'31 min ago',ic:'ti-cat',x:20,y:64},
+ {a:'Dog',r:'Trapped or stuck',loc:'Saki Naka',d:'1.2 km',s:'help',t:'6 min ago',ic:'ti-dog',x:46,y:84}
+];
+const DIRS=[
+ {k:'d1',eb:'Direction 01 · Civic / trusted response',n:'Signal',line:'A calm, highly legible response tool. Structure, not decoration, does the work: status is spelled out, actions are unmistakable, and the map is a clear operational surface.',
+  sw:[['Response teal','#0F4C5C'],['Urgent red','#C21F32'],['Background','#F5F6F4'],['Surface','#FFFFFF'],['Ink','#121619'],['Muted ink','#55606A']],
+  spec:['Animals near you','IBM Plex Sans (+ Plex Sans Devanagari). Neutral, engineered, very legible in sunlight and at small sizes; Indic companion for later localisation.','Status labels in small caps, high-contrast body, two weights per screen.']},
+ {k:'d2',eb:'Direction 02 · Human / warm / premium',n:'Kindred',line:'Technology that genuinely cares. Warm paper tones, generous space and real animal photography carry the emotion; a soft serif gives the product a human voice without becoming cute.',
+  sw:[['Banyan green','#2E5A4B'],['Urgent clay red','#A8322A'],['Saffron','#B07A1E'],['Paper','#F4EEE5'],['Surface','#FBF8F2'],['Warm ink','#2A221C']],
+  spec:['Animals near you','Fraunces (display serif) + Mukta (body, Latin + Devanagari by Ek Type). Editorial warmth in headlines, highly readable Indian-designed text face for UI.','Serif only for headings and names; all controls and status in Mukta.']},
+ {k:'d3',eb:'Direction 03 · Modern / bold / digital',n:'Pulse',line:'A next-generation response network. A deep, quiet map surface with luminous case markers, a crisp white action panel, big numerals for distance and time, and sharp, confident status blocks.',
+  sw:[['Cobalt','#1D3EE8'],['Alert red','#E8333F'],['Map ink','#0D141D'],['Panel','#FFFFFF'],['Signal amber','#F2A900'],['Ink','#0A0E13']],
+  spec:['850 m · Animals near you','Anek Latin (variable width; Anek family covers Devanagari, by Ek Type). Condensed widths for data and numerals, wide widths for headlines; one family, many voices.','Numbers are a design element: distance and ETA set large and condensed.']}
+];
+function chip(k,s,label){return `<span class="chip s-${s}" style="--s:${COL[k][s]}"><i class="ti ${ST[s].i}"></i>${label||ST[s].l}</span>`}
+function map(k,cases,sel,empty){
+ const svg=`<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+ <rect width="100" height="100" style="fill:var(--mapbg)"/>
+ <path d="M6 38 L27 33 L31 51 L10 57 Z" style="fill:var(--park)"/>
+ <path d="M58 58 L78 55 L80 66 L60 69 Z" style="fill:var(--park)"/>
+ <path d="M72 0 C78 16 90 24 100 27 L100 0 Z" style="fill:var(--water)"/>
+ <path d="M0 90 C18 82 40 94 60 87 S88 79 100 85 L100 100 L0 100 Z" style="fill:var(--water)"/>
+ <g style="stroke:var(--road)" stroke-width="1.1" vector-effect="non-scaling-stroke" fill="none">
+ <path d="M0 18 L100 22"/><path d="M0 47 L100 41"/><path d="M0 70 L100 64"/><path d="M14 0 L20 100"/><path d="M39 0 L35 100"/><path d="M61 0 L66 100"/><path d="M86 0 L80 100"/><path d="M0 30 L50 10"/><path d="M45 100 L100 52"/></g>
+ <g style="stroke:var(--major)" stroke-width="3.4" fill="none"><path d="M0 58 C30 52 55 60 100 46"/><path d="M52 0 C49 30 56 60 50 100"/></g></svg>`;
+ const mk=empty?'':cases.map((c,i)=>`<div class="mk s-${c.s}${i===sel?' sel':''}" style="left:${c.x}%;top:${c.y}%;--s:${COL[k][c.s]}"><i class="ti ${ST[c.s].i}"></i></div>`).join('');
+ return `<div class="mapw">${svg}<div class="ring"></div>${mk}<div class="you" style="left:50%;top:50%"></div></div>`;
+}
+const SB=`<div class="sb"><span>9:41</span><span><i class="ti ti-antenna-bars-5"></i> <i class="ti ti-battery-3"></i></span></div>`;
+function hdr(view){return `<div class="hdr"><h3>Animals near you</h3><p class="sub">Help an animal nearby</p><div class="loc"><i class="ti ti-current-location"></i><span>Near Andheri East · within 5 km</span></div><div class="tog"><span class="${view==='map'?'on':''}"><i class="ti ti-map-2"></i>Map</span><span class="${view==='list'?'on':''}"><i class="ti ti-list"></i>List</span></div></div>`}
+const CTA=`<button class="cta"><i class="ti ti-plus"></i>Report an animal in distress</button>`;
+const SEC=`<div class="sec"><a>Adopt a pet</a><a>Food donations</a><a>Vets and organisations</a><a>Help and safety</a></div>`;
+const NAV=`<div class="nav"><span class="on"><i class="ti ti-home"></i>Home</span><span><i class="ti ti-user"></i>Profile</span></div>`;
+function act(c){return c.s==='help'?`<div class="btnp"><i class="ti ti-navigation"></i>Take me to the animal</div>`:`<span class="ghost">View case <i class="ti ti-arrow-right"></i></span>`}
+function photo(c,k){return `<div class="photo"><i class="ti ${c.ic}"></i><span class="pl">PHOTO</span></div>`}
+function sDefault(k){return `<div class="screen">${SB}${hdr('map')}${map(k,CASES,-1)}<div class="lower"><div class="count"><b>5</b> animals need attention nearby</div>${CTA}${SEC}</div>${NAV}</div>`}
+function sSelected(k){const c=CASES[0];
+ const body=k==='d2'
+ ?`<div class="sheet">${photo(c,k)}<p class="t">${c.a}</p><p class="meta">${c.r} · ${c.loc} · ${c.d}</p>${chip(k,c.s)}<span class="meta" style="margin-left:8px">${c.t}</span><div class="btnp"><i class="ti ti-navigation"></i>Take me to the animal</div><div class="btns"><span>View case</span><span><i class="ti ti-share"></i>Share</span></div></div>`
+ :k==='d3'
+ ?`<div class="sheet" style="--s:${COL[k][c.s]}"><span class="dist">${c.d}</span><div class="row">${photo(c,k)}<div><p class="t">${c.a}</p><p class="meta">${c.r}</p>${chip(k,c.s)}</div></div><div class="data"><span>Location<b>${c.loc}</b></span><span>Reported<b>${c.t}</b></span></div><div class="btnp"><i class="ti ti-navigation"></i>Take me to the animal</div><div class="btns"><span>View case</span><span><i class="ti ti-share"></i>Share</span></div></div>`
+ :`<div class="sheet"><div class="row">${photo(c,k)}<div><p class="t">${c.a}</p><p class="meta">${c.r}</p><p class="meta"><i class="ti ti-map-pin"></i> ${c.loc} · ${c.d}</p>${chip(k,c.s)}<p class="meta">Reported ${c.t}</p></div></div><div class="btnp"><i class="ti ti-navigation"></i>Take me to the animal</div><div class="btns"><span>View case</span><span><i class="ti ti-share"></i>Share</span></div></div>`;
+ return `<div class="screen">${SB}${hdr('map')}${map(k,CASES,0)}${body}</div>`}
+function card(k,c){
+ const lab=c.s==='accepted'?'Accepted by Lumen Animal Rescue':null;
+ if(k==='d2')return `<div class="card">${photo(c,k)}<div class="cardw"><p class="t">${c.a}</p><p class="meta">${c.loc} · ${c.d} · ${c.r}</p>${chip(k,c.s,lab)}<div class="act">${act(c)}</div></div></div>`;
+ return `<div class="card" style="--s:${COL[k][c.s]}">${k==='d3'?`<span class="dist">${c.d}</span>`:''}${photo(c,k)}<div class="cardw"><p class="t">${c.a}</p><p class="meta">${c.loc}${k==='d3'?'':' · '+c.d} · ${c.r}</p>${chip(k,c.s,lab)}<div class="act">${act(c)}</div></div></div>`}
+function sList(k){const cs=[CASES[0],CASES[1],CASES[2],CASES[3]].map(c=>card(k,c)).join('');
+ const inner=k==='d3'?`<div class="listw">${cs}</div>`:`<div class="list">${cs}</div>`;
+ return `<div class="screen">${SB}${hdr('list')}<div class="ctapin">${CTA}</div>${inner}${NAV}</div>`}
+function sEmpty(k){return `<div class="screen">${SB}${hdr('map')}${map(k,[],-1,true)}<div class="lower"><div class="empty"><p class="h">No animals near you need help right now.</p><p>There are no active cases within 5 km of you.</p></div>${CTA}${SEC}</div>${NAV}</div>`}
+function legend(k){return Object.keys(ST).map(s=>chip(k,s)).join('')}
+function mkleg(k){return Object.keys(ST).map(s=>`<div class="it"><div class="mk s-${s}" style="--s:${COL[k][s]}"><i class="ti ${ST[s].i}"></i></div></div>`).join('')}
+document.getElementById('dirs').innerHTML=DIRS.map(D=>`<section class="dir ${D.k}">
+<div class="dir-head"><div><p class="eyebrow">${D.eb}</p><h2 class="dname">${D.n}</h2><p class="dline">${D.line}</p>
+<div class="sw">${D.sw.map(s=>`<div><span style="background:${s[1]}"></span>${s[0]}<br>${s[1]}</div>`).join('')}</div></div>
+<div><div class="spec"><p class="a">${D.spec[0]}</p><p class="b">${D.spec[1]}</p><p class="c">${D.spec[2]}</p></div>
+<div class="legend">${legend(D.k)}</div><div class="mkleg">${mkleg(D.k)}</div></div></div>
+<div class="phones">
+<div class="ph"><div class="frame">${sDefault(D.k)}</div><p class="cap">H1 · Map default</p></div>
+<div class="ph"><div class="frame">${sSelected(D.k)}</div><p class="cap">H2 · Selected case</p></div>
+<div class="ph"><div class="frame">${sList(D.k)}</div><p class="cap">H4 · List</p></div>
+<div class="ph"><div class="frame">${sEmpty(D.k)}</div><p class="cap">H5 · Empty nearby</p></div>
+</div></section>`).join('');
+</script>
+</body>
+</html>

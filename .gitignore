@@ -1,0 +1,16 @@
+# Dependencies and build output
+node_modules/
+dist/
+web-build/
+.expo/
+expo-env.d.ts
+
+# Local-only files (not part of the app)
+media/
+New Text Document.txt
+.claude/
+
+# OS and editor
+.DS_Store
+Thumbs.db
+*.log
