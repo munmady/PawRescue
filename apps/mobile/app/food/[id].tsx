@@ -4,7 +4,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeInDown, ZoomIn } from 'react-native-reanimated';
 import { Check, Minus, Plus } from 'lucide-react-native';
-import { Button, FadeSlide, PressableScale, ScreenHeader } from '@/src/ui';
+import { Button, FadeSlide, PressableScale, ScreenHeader, Tag } from '@/src/ui';
 import { useStore } from '@/src/store';
 import { ProductArt } from '@/src/ProductArt';
 import { Celebration } from '@/src/Celebration';
@@ -116,9 +116,8 @@ export default function FoodRequest() {
 
 function StatusTick({ label, delay }: { label: string; delay: number }) {
   return (
-    <Animated.View entering={FadeIn.delay(delay).duration(300)} style={styles.tick}>
-      <View style={styles.tickDot}><Check size={11} color="#ffffff" strokeWidth={3} /></View>
-      <Text style={styles.tickText}>{label}</Text>
+    <Animated.View entering={FadeIn.delay(delay).duration(300)}>
+      <Tag label={label} tone="success" icon={Check} lines={1} />
     </Animated.View>
   );
 }
@@ -135,8 +134,5 @@ const styles = StyleSheet.create({
   center: { textAlign: 'center' },
   receipt: { alignSelf: 'stretch', flexDirection: 'row', alignItems: 'center', gap: space[3], marginTop: space[2], padding: space[3], borderRadius: radius.md, backgroundColor: color.surface, borderWidth: 1, borderColor: color.line, ...shadow.card },
   ticks: { flexDirection: 'row', gap: space[2], justifyContent: 'center' },
-  tick: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingLeft: 4, paddingRight: 12, paddingVertical: 4, borderRadius: radius.pill, backgroundColor: pastel.mint.bg, borderWidth: 1, borderColor: pastel.mint.soft },
-  tickDot: { width: 18, height: 18, borderRadius: 9, backgroundColor: pastel.mint.ink, alignItems: 'center', justifyContent: 'center' },
-  tickText: { fontFamily: font.bold, fontSize: 12.5, color: pastel.mint.ink },
   thanksActions: { alignSelf: 'stretch', gap: space[2], marginTop: space[3] },
 });

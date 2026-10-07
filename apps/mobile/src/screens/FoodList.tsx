@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { ChevronRight, Truck } from 'lucide-react-native';
-import { PressableScale, ScreenHeader } from '@/src/ui';
+import { PressableScale, ScreenHeader, Tag } from '@/src/ui';
 import { timeAgo, useStore } from '@/src/store';
 import { ProductArt } from '@/src/ProductArt';
 import { color, font, pastel, radius, shadow, space, type } from '@/src/theme';
@@ -60,7 +60,7 @@ export function FoodList({ mine, tab }: { mine?: boolean; tab?: boolean }) {
                 {r.products.map((x) => (
                   <View key={x.id} style={styles.pack}>
                     <ProductArt kind={x.kind} fill={x.fill} photo={x.photo} size={76} label={x.size} />
-                    <View style={styles.weight}><Text style={styles.weightText} numberOfLines={1}>{x.size}</Text></View>
+                    <Tag label={x.size} tone="mint" style={{ alignSelf: 'center' }} />
                   </View>
                 ))}
               </View>
@@ -74,12 +74,7 @@ export function FoodList({ mine, tab }: { mine?: boolean; tab?: boolean }) {
 }
 
 function Badge({ label, icon }: { label: string; icon?: boolean }) {
-  return (
-    <View style={styles.badge}>
-      {icon ? <Truck size={12} color={color.infoInk} /> : null}
-      <Text style={styles.badgeText}>{label}</Text>
-    </View>
-  );
+  return <Tag label={label} tone="info" icon={icon ? Truck : undefined} lines={1} />;
 }
 
 const styles = StyleSheet.create({
@@ -87,10 +82,6 @@ const styles = StyleSheet.create({
   card: { backgroundColor: color.surface, borderRadius: radius.md, padding: space[4], gap: space[3], ...shadow.card },
   row: { flexDirection: 'row', alignItems: 'center', gap: space[3] },
   packs: { flexDirection: 'row', flexWrap: 'wrap', gap: space[2] },
-  pack: { flexBasis: '31%', flexGrow: 0, alignItems: 'center', gap: space[2], paddingVertical: space[3], paddingHorizontal: 6, borderRadius: radius.md, backgroundColor: '#ffffff', borderWidth: 1, borderColor: color.line, boxShadow: '0 4px 12px rgba(110, 130, 170, 0.10)' },
-  weight: { maxWidth: '100%', paddingHorizontal: 8, paddingVertical: 3, borderRadius: radius.pill, backgroundColor: pastel.mint.bg, borderWidth: 1, borderColor: pastel.mint.soft },
-  weightText: { fontFamily: font.bold, fontSize: 11, color: pastel.mint.ink },
+  pack: { flexBasis: '31%', flexGrow: 0, alignItems: 'center', gap: space[2], paddingVertical: space[3], paddingHorizontal: 2, borderRadius: radius.md, backgroundColor: '#ffffff', borderWidth: 1, borderColor: color.line, boxShadow: '0 4px 12px rgba(110, 130, 170, 0.10)' },
   statusRow: { flexDirection: 'row', flexWrap: 'wrap', gap: space[2] },
-  badge: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: color.surfaceTint, borderRadius: radius.pill, paddingHorizontal: 10, paddingVertical: 4 },
-  badgeText: { fontFamily: font.bold, fontSize: 11.5, color: color.infoInk },
 });

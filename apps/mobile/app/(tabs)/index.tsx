@@ -12,7 +12,7 @@ import { canTakeMeToAnimal, isProfessionalActive, isVisibleOnHome, primaryAction
 import { MapCanvas } from '@/src/MapCanvas';
 import { ReportBadgeIcon } from '@/src/ReportBadge';
 import { PROMO_PHOTOS, casePhoto } from '@/src/photos';
-import { AnimalPhoto, Button, PressableScale, StatusChip } from '@/src/ui';
+import { AnimalPhoto, Button, PressableScale, StatusChip, Tag } from '@/src/ui';
 import { distanceLabel, timeAgo, useStore } from '@/src/store';
 import { problemText, shareCase } from '@/src/actions';
 import { ORGANISATIONS, type Case } from '@/src/data';
@@ -222,10 +222,7 @@ function BentoTile({
 
       <Text style={styles.tileTitle} numberOfLines={2}>{title}</Text>
       <Text style={styles.tileSub} numberOfLines={2}>{sub}</Text>
-      <View style={styles.tilePill}>
-        <GradientFill colors={[p.soft, '#ffffff']} id={`pill-${tone}`} horizontal />
-        <Text style={[styles.tilePillText, { color: p.ink }]} numberOfLines={1}>{pill}</Text>
-      </View>
+      <View style={{ marginTop: 6 }}><Tag label={pill} tone={tone} lines={1} /></View>
       <View style={[styles.tileGo, { backgroundColor: p.ink }]}>
         <ArrowRight size={18} color="#ffffff" strokeWidth={2.6} />
       </View>
@@ -297,7 +294,7 @@ function CaseRow({ c, i, onPress, onShare }: { c: Case; i: number; onPress: () =
             <Text style={styles.dist}>{distanceLabel(c.distanceM)}</Text>
           </View>
           <Text style={type.caption} numberOfLines={1}>{c.area} · {problemText(c)}</Text>
-          <View style={{ marginTop: 4, marginRight: 40 }}><StatusChip c={c} size="sm" /></View>
+          <View style={{ marginTop: 4, marginRight: 40 }}><StatusChip c={c} /></View>
         </View>
       </PressableScale>
       {/* Opening the card leads to Case Detail, where Take me to the animal lives. */}
@@ -355,8 +352,6 @@ const styles = StyleSheet.create({
   tile: { flex: 1, minHeight: 196, padding: space[4], paddingBottom: 64, borderRadius: 22, backgroundColor: color.surface, overflow: 'hidden', gap: 4, boxShadow: '0 10px 28px rgba(110, 130, 170, 0.16)' },
   tileTitle: { fontFamily: font.headingExtrabold, fontSize: 17, lineHeight: 21, color: color.ink, letterSpacing: -0.2 },
   tileSub: { fontFamily: font.semibold, fontSize: 12, lineHeight: 16, color: color.inkMuted },
-  tilePill: { alignSelf: 'flex-start', marginTop: 6, paddingHorizontal: 10, paddingVertical: 4, borderRadius: radius.pill, overflow: 'hidden' },
-  tilePillText: { fontFamily: font.bold, fontSize: 11.5 },
   tileGo: { position: 'absolute', left: space[4], bottom: space[4], width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center' },
   cornerPhoto: { position: 'absolute', right: -14, bottom: -14, width: 96, height: 96, borderRadius: 48, borderWidth: 5, overflow: 'hidden' },
   cornerPhotoImg: { width: '100%', height: '100%' },

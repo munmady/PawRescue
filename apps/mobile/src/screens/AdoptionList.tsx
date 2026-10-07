@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { MapPin, Plus } from 'lucide-react-native';
 import type { Species } from '@animal/shared';
-import { AnimalPhoto, Button, Pill, PressableScale, ScreenHeader, SheetDialog } from '@/src/ui';
+import { AnimalPhoto, Button, Pill, PressableScale, ScreenHeader, SheetDialog, Tag } from '@/src/ui';
 import { useStore } from '@/src/store';
 import { adoptionPhoto } from '@/src/photos';
 import type { AdoptionListing } from '@/src/data';
@@ -54,9 +54,7 @@ function Tile({ a, i }: { a: AdoptionListing; i: number }) {
       <PressableScale onPress={() => router.push(`/adoption/${a.id}`)} accessibilityLabel={`Open ${a.name ?? 'listing'}`} style={styles.tile}>
         <AnimalPhoto species={a.species} photo={adoptionPhoto(a)} style={{ height: 130, borderRadius: radius.sm }} iconSize={44} />
         <View style={{ padding: space[3], gap: 4 }}>
-          <View style={[styles.tag, a.status === 'Adopted' && { backgroundColor: color.successTint }]}>
-            <Text style={[styles.tagText, a.status === 'Adopted' && { color: color.successInk }]}>{a.status}</Text>
-          </View>
+          <Tag label={a.status} tone={a.status === 'Adopted' ? 'success' : 'amber'} />
           <Text style={type.section} numberOfLines={1}>{a.name ?? (a.species === 'dog' ? 'Dog' : a.species === 'cat' ? 'Cat' : 'Animal')} · {a.age}</Text>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
             <MapPin size={12} color={color.inkSecondary} />
@@ -96,8 +94,6 @@ const styles = StyleSheet.create({
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: space[3] },
   tileWrap: { width: '47.8%' },
   tile: { backgroundColor: color.surface, borderRadius: radius.md, overflow: 'hidden', ...shadow.card },
-  tag: { alignSelf: 'flex-start', backgroundColor: color.amberTint, borderRadius: radius.pill, paddingHorizontal: 8, paddingVertical: 2 },
-  tagText: { fontFamily: font.bold, fontSize: 11, color: color.amberInk },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: space[2] },
   input: { borderWidth: 1, borderColor: color.line, borderRadius: radius.md, paddingHorizontal: space[3], paddingVertical: 10, fontFamily: font.regular, fontSize: 15, color: color.ink },
 });

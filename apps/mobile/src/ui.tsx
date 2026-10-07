@@ -1,4 +1,4 @@
-import { useEffect, type ComponentType, type ReactNode } from 'react';
+import { useEffect, useId, type ComponentType, type ReactNode } from 'react';
 import { Image, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View, type StyleProp, type ViewStyle, type TextStyle, type AccessibilityRole, type AccessibilityState, type ImageSourcePropType } from 'react-native';
 import Animated, {
   FadeIn, FadeInDown, FadeOut, FadeOutDown, SlideInDown, SlideOutDown, useAnimatedStyle, useReducedMotion,
@@ -9,8 +9,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Ambulance, Cat, ChevronLeft, CircleCheck, Clock, Dog, EyeOff, Images, MapPinCheck, PawPrint, Route, Siren, type LucideIcon,
 } from 'lucide-react-native';
-import { statusLabel, statusTone, type CaseLike, type Species } from '@animal/shared';
-import { color, font, radius, shadow, space, toneColors, type } from './theme';
+import { statusLabel, statusTone, type CaseLike, type Species, type StatusTone } from '@animal/shared';
+import { color, font, pastel, radius, shadow, space, toneColors, type, type PastelName } from './theme';
 import { useStore } from './store';
 import { GradientFill } from './PastelBackdrop';
 
@@ -81,17 +81,33 @@ export function statusIcon(c: CaseLike): LucideIcon {
   }
 }
 
-export function StatusChip({ c, size = 'md', label }: { c: CaseLike; size?: 'sm' | 'md'; label?: string }) {
-  const toneName = statusTone(c);
-  const tone = toneColors[toneName];
-  const Icon = statusIcon(c);
-  const sm = size === 'sm';
+/**
+ * The one label style used across the app (matches Home): a tint that fades
+ * from the tone colour to white, bold 11.5 px text, optional icon. Use this for
+ * every status, tag and pill so labels look the same on every page.
+ */
+export type TagTone = StatusTone | PastelName;
+export function Tag({ label, tone = 'info', icon: Icon, lines = 2, style }: { label: string; tone?: TagTone; icon?: LucideIcon; lines?: number; style?: StyleProp<ViewStyle> }) {
+  const t = tone in toneColors
+    ? { bg: toneColors[tone as StatusTone].bg, fg: toneColors[tone as StatusTone].fg }
+    : { bg: pastel[tone as PastelName].soft, fg: pastel[tone as PastelName].ink };
+  // Unique gradient id per tag: on web, duplicate SVG ids resolve to the first one,
+  // which may live in a hidden screen and then never paint.
+  const gid = `tag-${tone}-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
   return (
-    <Animated.View key={c.status} entering={FadeIn.duration(250)} style={[styles.chip, { paddingVertical: sm ? 3 : 5 }]}>
-      {/* Fades from the status colour to white, like the Home tile pills. */}
-      <GradientFill colors={[tone.bg, '#ffffff']} id={`chip-${toneName}`} horizontal />
-      <View><Icon size={sm ? 13 : 15} color={tone.fg} strokeWidth={2.2} /></View>
-      <Text numberOfLines={2} style={[styles.chipText, { color: tone.fg, fontSize: sm ? 11.5 : 12.5 }]}>{label ?? statusLabel(c)}</Text>
+    <View style={[styles.tag, style]}>
+      <GradientFill colors={[t.bg, '#ffffff']} id={gid} horizontal />
+      {Icon ? <View><Icon size={13} color={t.fg} strokeWidth={2.2} /></View> : null}
+      <Text numberOfLines={lines} style={[styles.tagText, { color: t.fg }]}>{label}</Text>
+    </View>
+  );
+}
+
+/** Case status as a Tag. One size everywhere (the old `size` prop is accepted but ignored). */
+export function StatusChip({ c, label }: { c: CaseLike; size?: 'sm' | 'md'; label?: string }) {
+  return (
+    <Animated.View key={c.status} entering={FadeIn.duration(250)} style={{ alignSelf: 'flex-start', maxWidth: '100%' }}>
+      <Tag label={label ?? statusLabel(c)} tone={statusTone(c)} icon={statusIcon(c)} />
     </Animated.View>
   );
 }
@@ -255,9 +271,9 @@ export function FadeSlide({ children, k }: { children: ReactNode; k: string | nu
 }
 
 export const styles = StyleSheet.create({
+  tag: { flexDirection: 'row', alignItems: 'center', gap: 5, alignSelf: 'flex-start', maxWidth: '100%', paddingHorizontal: 10, paddingVertical: 4, borderRadius: radius.pill, overflow: 'hidden' },
+  tagText: { fontFamily: font.bold, fontSize: 11.5, lineHeight: 15, flexShrink: 1 },
   btn: { minHeight: 50, borderRadius: radius.pill, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space[2], paddingHorizontal: space[5] },
-  chip: { flexDirection: 'row', alignItems: 'center', gap: 5, alignSelf: 'flex-start', paddingHorizontal: 10, borderRadius: radius.pill, maxWidth: '100%', overflow: 'hidden' },
-  chipText: { fontFamily: font.bold, lineHeight: 16, flexShrink: 1 },
   photo: { backgroundColor: color.surfaceTint, borderRadius: radius.sm, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
   photoHalo: { position: 'absolute', width: '70%', aspectRatio: 1, borderRadius: 999, backgroundColor: '#ffffff', opacity: 0.55 },
   photoCount: { position: 'absolute', right: 6, bottom: 6, flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: 'rgba(255,255,255,0.9)', borderRadius: radius.pill, paddingHorizontal: 7, paddingVertical: 2 },

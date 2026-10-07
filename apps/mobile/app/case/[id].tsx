@@ -6,7 +6,7 @@ import Animated, { FadeInDown, useAnimatedStyle, useSharedValue, withTiming, Eas
 import { BadgeCheck, Ellipsis, MapPin, MessageCircle, Navigation, Pause, Phone, Play, Share2, type LucideIcon } from 'lucide-react-native';
 import { canReporterCancel, canTakeMeToAnimal, isProfessionalActive, statusLabel, statusTone } from '@animal/shared';
 import { casePhoto } from '@/src/photos';
-import { AnimalPhoto, Button, PressableScale, ScreenHeader, SheetDialog, StatusChip, statusIcon } from '@/src/ui';
+import { AnimalPhoto, Button, PressableScale, ScreenHeader, SheetDialog, StatusChip, Tag } from '@/src/ui';
 import { MapCanvas } from '@/src/MapCanvas';
 import { distanceLabel, timeAgo, useCase, useStore } from '@/src/store';
 import { DEMO_CALL, problemText, shareCase } from '@/src/actions';
@@ -37,7 +37,8 @@ export default function CaseDetail() {
   const transporter = transportedIds.includes(c.id);
   const official = [...chats].reverse().find((m) => m.caseId === c.id && m.official);
   const messageCount = chats.filter((m) => m.caseId === c.id && !m.official).length;
-  const photoW = Math.min(width, 440) - space[5] * 2;
+  // Photo sits inset in the hero card with the same 16 px padding every card uses.
+  const photoW = Math.min(width, 440) - space[5] * 2 - 2 - space[4] * 2;
   const tone = toneColors[statusTone(c)];
   const takeMe = () => requireAccount('Sign in to help this animal', () => router.push(`/respond/${c.id}`));
 
@@ -52,40 +53,48 @@ export default function CaseDetail() {
         ) : undefined}
       />
       <ScrollView contentContainerStyle={{ paddingHorizontal: space[5], paddingBottom: space[8], gap: space[3] }} showsVerticalScrollIndicator={false}>
-        {/* 1 · Evidence */}
-        <Animated.View entering={FadeInDown.duration(300)} style={styles.gallery}>
-          <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} onScroll={(e) => setPage(Math.round(e.nativeEvent.contentOffset.x / photoW))} scrollEventThrottle={32}>
-            {Array.from({ length: Math.max(1, c.evidence) }).map((_, i) => (
-              <AnimalPhoto key={i} species={c.species} photo={casePhoto(c, i)} sensitive={c.sensitive} revealed={revealed} onReveal={() => setRevealed(true)} iconSize={72} style={{ width: photoW, height: 260, borderRadius: 0 }} />
-            ))}
-          </ScrollView>
-          {c.evidence > 1 ? (
-            <View style={styles.dots} pointerEvents="none">
-              {Array.from({ length: c.evidence }).map((_, i) => <View key={i} style={[styles.dot, i === page && styles.dotOn]} />)}
-            </View>
-          ) : null}
-        </Animated.View>
-
-        {/* 2 · Summary (overlaps the photo slightly) */}
-        <Animated.View entering={FadeInDown.delay(60).duration(300)} style={[styles.card, styles.summary]}>
-          <StatusChip c={c} />
-          <View style={{ gap: 2 }}>
-            <Text style={type.display}>{c.title}</Text>
-            <Text style={type.caption}>Reported {timeAgo(c.reportedAt)} · Case {c.id}</Text>
+        {/* 1 · Photos and summary in one card */}
+        <Animated.View entering={FadeInDown.duration(300)} style={[styles.card, styles.heroCard]}>
+          <View style={styles.gallery}>
+            <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} onScroll={(e) => setPage(Math.round(e.nativeEvent.contentOffset.x / photoW))} scrollEventThrottle={32}>
+              {Array.from({ length: Math.max(1, c.evidence) }).map((_, i) => (
+                <AnimalPhoto key={i} species={c.species} photo={casePhoto(c, i)} sensitive={c.sensitive} revealed={revealed} onReveal={() => setRevealed(true)} iconSize={72} style={{ width: photoW, height: 240, borderRadius: 0 }} />
+              ))}
+            </ScrollView>
+            {c.evidence > 1 ? (
+              <View style={styles.dots} pointerEvents="none">
+                {Array.from({ length: c.evidence }).map((_, i) => <View key={i} style={[styles.dot, i === page && styles.dotOn]} />)}
+              </View>
+            ) : null}
           </View>
-          <View style={styles.tags}>
-            <View style={styles.tag}><Text style={styles.tagText}>{problemText(c)}</Text></View>
-            <View style={[styles.tag, styles.tagQuiet]}>
-              <MapPin size={13} color={color.inkSecondary} />
-              <Text style={[styles.tagText, { color: color.inkSecondary }]}>{c.area} · {distanceLabel(c.distanceM)}</Text>
+          <View style={styles.heroBody}>
+            <View style={{ gap: 2 }}>
+              <Text style={type.display}>{c.title}</Text>
+              <Text style={type.caption}>Reported {timeAgo(c.reportedAt)} · Case {c.id}</Text>
             </View>
+            <View style={styles.tags}>
+              <Tag label={problemText(c)} tone="info" />
+              <Tag label={`${c.area} · ${distanceLabel(c.distanceM)}`} tone="neutral" icon={MapPin} />
+            </View>
+            {c.noMedia ? <Text style={type.caption}>No media: the reporter couldn&apos;t capture it safely.</Text> : null}
           </View>
-          {c.noMedia ? <Text style={type.caption}>No media: the reporter couldn&apos;t capture it safely.</Text> : null}
         </Animated.View>
 
         {/* 3 · Status and action */}
         <Animated.View entering={FadeInDown.delay(110).duration(300)} style={[styles.card, { borderWidth: 1.5, borderColor: tone.bg }]}>
           <StatusMessage />
+          {/* Where the animal is, right before the action to go there. */}
+          <View style={styles.miniMap} pointerEvents="none">
+            {/* Keep the pin fully inside this small map (it's an illustration, not to scale). */}
+            <MapCanvas cases={[{ ...c, x: Math.min(82, Math.max(18, c.x)), y: Math.min(85, Math.max(60, c.y)) }]} onSelect={() => {}} />
+          </View>
+          <View style={styles.addrRow}>
+            <View style={styles.addrIcon}><MapPin size={16} color={color.action} /></View>
+            <View style={{ flex: 1 }}>
+              <Text style={[type.section, { fontSize: 14 }]}>{c.landmark ?? c.area}</Text>
+              <Text style={type.caption}>{c.landmark ? `${c.area} · ` : ''}{distanceLabel(c.distanceM)} from you</Text>
+            </View>
+          </View>
           {c.status === 'NEW' ? <Button label="Take me to the animal" icon={Navigation} onPress={takeMe} /> : null}
           {isProfessionalActive(c) && canTakeMeToAnimal(c) ? <Button label="Take me to the animal (navigation only)" variant="outline" icon={Navigation} onPress={takeMe} /> : null}
           {mine && (c.status === 'ACCEPTED' || c.status === 'ON_THE_WAY') ? <Button label="Call the organisation" variant="link" icon={Phone} onPress={() => showToast(DEMO_CALL)} /> : null}
@@ -102,22 +111,6 @@ export default function CaseDetail() {
           <Text style={styles.cardTitle}>What the reporter saw</Text>
           <Text style={[type.body, { color: color.ink }]}>{c.description}</Text>
           {c.voiceNoteSeconds ? <VoiceNote seconds={c.voiceNoteSeconds} /> : null}
-        </Animated.View>
-
-        {/* 6 · Location */}
-        <Animated.View entering={FadeInDown.delay(230).duration(300)} style={styles.card}>
-          <Text style={styles.cardTitle}>Location</Text>
-          <View style={styles.miniMap} pointerEvents="none">
-            {/* Keep the pin fully inside this small map (it's an illustration, not to scale). */}
-            <MapCanvas cases={[{ ...c, x: Math.min(82, Math.max(18, c.x)), y: Math.min(85, Math.max(60, c.y)) }]} onSelect={() => {}} />
-          </View>
-          <View style={styles.addrRow}>
-            <View style={styles.addrIcon}><MapPin size={16} color={color.action} /></View>
-            <View style={{ flex: 1 }}>
-              <Text style={[type.section, { fontSize: 14 }]}>{c.landmark ?? c.area}</Text>
-              <Text style={type.caption}>{c.landmark ? `${c.area} · ` : ''}{distanceLabel(c.distanceM)} from you</Text>
-            </View>
-          </View>
         </Animated.View>
 
         {/* 7 · Official update */}
@@ -194,14 +187,10 @@ export default function CaseDetail() {
       case 'CLOSED': body = c.outcome === 'not_found' ? 'The team couldn’t find this animal. If you see it, share where in the case chat.' : 'Thank you for stopping to help.'; break;
       case 'CANCELLED': body = 'Rescue teams are no longer being alerted.'; break;
     }
-    const StatusIcon = statusIcon(c);
     return (
-      <View style={styles.statusRow}>
-        <View style={[styles.statusIcon, { backgroundColor: tone.bg }]}><StatusIcon size={18} color={tone.fg} strokeWidth={2.2} /></View>
-        <View style={{ flex: 1, gap: 3 }}>
-          <Text style={[type.section, { color: c.status === 'NEW' ? color.urgent : color.ink }]}>{head}</Text>
-          {body ? <Text style={type.label}>{body}</Text> : null}
-        </View>
+      <View style={{ gap: space[2] }}>
+        <StatusChip c={c} label={head} />
+        {body ? <Text style={[type.body, { color: color.ink }]}>{body}</Text> : null}
       </View>
     );
   }
@@ -243,20 +232,16 @@ function VoiceNote({ seconds }: { seconds: number }) {
 
 const styles = StyleSheet.create({
   iconBtn: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
-  gallery: { borderRadius: radius.lg, overflow: 'hidden', backgroundColor: color.surfaceTint },
-  dots: { position: 'absolute', bottom: 36, left: 0, right: 0, flexDirection: 'row', justifyContent: 'center', gap: 6 },
+  gallery: { margin: space[4], marginBottom: 0, borderRadius: radius.md, overflow: 'hidden', backgroundColor: color.surfaceTint },
+  dots: { position: 'absolute', bottom: 12, left: 0, right: 0, flexDirection: 'row', justifyContent: 'center', gap: 6 },
   dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: 'rgba(255,255,255,0.65)' },
   dotOn: { width: 18, backgroundColor: '#ffffff' },
   card: { backgroundColor: color.surface, borderRadius: 20, padding: space[4], gap: space[3], borderWidth: 1, borderColor: color.line, ...shadow.card },
-  summary: { marginTop: -28, marginHorizontal: space[2] },
+  heroCard: { padding: 0, gap: 0, overflow: 'hidden' },
+  heroBody: { padding: space[4], gap: space[3] },
   cardTitle: { fontFamily: font.headingBold, fontSize: 15, color: color.ink },
   rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space[2] },
   tags: { flexDirection: 'row', flexWrap: 'wrap', gap: space[2] },
-  tag: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 5, borderRadius: radius.pill, backgroundColor: color.surfaceTint },
-  tagQuiet: { backgroundColor: color.fill },
-  tagText: { fontFamily: font.semibold, fontSize: 12.5, color: color.infoInk },
-  statusRow: { flexDirection: 'row', alignItems: 'flex-start', gap: space[3] },
-  statusIcon: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center' },
   quickRow: { flexDirection: 'row', gap: space[3] },
   quick: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: space[3], backgroundColor: color.surface, borderRadius: 18, padding: space[3], borderWidth: 1, borderColor: color.line, ...shadow.card },
   quickIcon: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center', backgroundColor: color.surfaceTint },
