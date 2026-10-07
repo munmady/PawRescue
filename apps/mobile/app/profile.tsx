@@ -6,7 +6,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import {
   BadgeCheck, Bell, ChevronRight, ClipboardList, FileText, HandHeart, LifeBuoy, LogOut, PawPrint, Lock, type LucideIcon,
 } from 'lucide-react-native';
-import { Button, Card, PressableScale } from '@/src/ui';
+import { Button, Card, PressableScale, ScreenHeader } from '@/src/ui';
 import { mobileLabel, useStore } from '@/src/store';
 import { color, font, pastel, radius, shadow, space, type, type PastelName } from '@/src/theme';
 import { PastelBackdrop } from '@/src/PastelBackdrop';
@@ -18,8 +18,9 @@ export default function Profile() {
 
   if (!account) {
     return (
-      <View style={[styles.screen, { paddingTop: insets.top + space[6] }]}>
+      <View style={[styles.screen, { paddingTop: insets.top }]}>
         <PastelBackdrop variant="profile" />
+        <ScreenHeader title="Profile" />
         <Animated.View entering={FadeInDown.duration(350)} style={{ gap: space[3] }}>
           <View style={styles.bigIcon}><PawPrint size={34} color={color.action} /></View>
           <Text style={type.display}>Your profile</Text>
@@ -35,8 +36,9 @@ export default function Profile() {
 
   const myListings = adoptions.filter((a) => a.mine).length;
   return (
-    <ScrollView style={{ backgroundColor: color.page }} contentContainerStyle={[styles.screen, { paddingTop: insets.top + space[5], paddingBottom: 130 }]}>
+    <ScrollView style={{ backgroundColor: color.page }} contentContainerStyle={[styles.screen, { paddingTop: insets.top, paddingBottom: space[8] }]}>
       <PastelBackdrop variant="profile" />
+      <ScreenHeader title="Profile" />
       <Animated.View entering={FadeInDown.duration(350)} style={styles.head}>
         <View style={styles.avatar}><Text style={styles.avatarText}>{account.name[0]?.toUpperCase()}</Text></View>
         <View style={{ flex: 1 }}>

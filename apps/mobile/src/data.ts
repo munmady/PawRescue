@@ -161,7 +161,7 @@ export const SEED_CASES: Case[] = [
     ],
   },
   {
-    id: 'AR-10238', species: 'dog', title: 'Dog', problems: ['cant_walk'],
+    id: 'AR-10238', species: 'dog', title: 'Dog unable to walk', problems: ['cant_walk'],
     description: "Dog that can't stand up, lying on the pavement near the station's east exit.",
     area: 'Jogeshwari', distanceM: 2400, x: 68, y: 72,
     status: 'RESPONDER_TO_HOSPITAL', hospitalName: 'Lumen Animal Rescue & Vet Care',
@@ -172,7 +172,7 @@ export const SEED_CASES: Case[] = [
     ],
   },
   {
-    id: 'AR-10236', species: 'cat', title: 'Cat', problems: ['very_sick'],
+    id: 'AR-10236', species: 'cat', title: 'Weak kitten', problems: ['very_sick'],
     description: 'Very weak kitten with sore eyes, not eating, in the society parking area.',
     area: 'Marol', distanceM: 3100, x: 19, y: 63,
     status: 'ACCEPTED', organisationName: 'Lumen Animal Rescue & Shelter',
@@ -183,14 +183,14 @@ export const SEED_CASES: Case[] = [
     ],
   },
   {
-    id: 'AR-10247', species: 'dog', title: 'Dog', problems: ['trapped'],
+    id: 'AR-10247', species: 'dog', title: 'Trapped puppy', problems: ['trapped'],
     description: 'Puppy stuck under a broken concrete slab, crying.',
     area: 'Saki Naka', landmark: 'Behind the bakery', distanceM: 1200, x: 46, y: 84,
     status: 'NEW', reportedAt: now - 6 * min, reporterId: 'u-ravi', evidence: 2, photos: ['puppy-trapped', 'puppy-trapped-face'],
     events: [{ at: now - 6 * min, label: 'Reported' }],
   },
   {
-    id: 'AR-10230', species: 'dog', title: 'Dog', problems: ['bleeding'],
+    id: 'AR-10230', species: 'dog', title: 'Dog with an eye wound', problems: ['bleeding'],
     description: 'Dog with a wound near its eye, lying by a parked car. The rescue team searched the area.',
     area: 'Chakala', distanceM: 1500, x: 58, y: 44,
     status: 'CLOSED', outcome: 'not_found', closedAt: now - 30 * min,

@@ -18,6 +18,7 @@ import { problemText, shareCase } from '@/src/actions';
 import { ORGANISATIONS, type Case } from '@/src/data';
 import { color, font, pastel, radius, shadow, space, type } from '@/src/theme';
 import { GradientFill, PastelBackdrop } from '@/src/PastelBackdrop';
+import { ProfileButton } from '@/src/ProfileButton';
 
 type View_ = 'map' | 'list';
 
@@ -54,7 +55,7 @@ export default function Home() {
             <Text style={type.label}>Near Andheri East · within 5 km</Text>
           </View>
         </View>
-        <View style={styles.demo}><Text style={styles.demoText}>Demo</Text></View>
+        <ProfileButton />
       </Animated.View>
 
       <Toggle value={view} count={visible.length} onChange={(v) => { setView(v); setSelectedId(null); }} />
@@ -329,8 +330,6 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: color.page },
   head: { flexDirection: 'row', alignItems: 'flex-start', paddingHorizontal: space[5], marginBottom: space[3] },
   locRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 },
-  demo: { backgroundColor: color.amberTint, borderRadius: radius.pill, paddingHorizontal: 10, paddingVertical: 4, marginTop: 6 },
-  demoText: { fontFamily: font.bold, fontSize: 11, color: color.amberInk, letterSpacing: 0.4 },
   toggle: {
     flexDirection: 'row', marginHorizontal: space[5], marginBottom: space[3], padding: 3, borderRadius: radius.pill,
     backgroundColor: '#ffffff', borderWidth: 1, borderColor: color.line,

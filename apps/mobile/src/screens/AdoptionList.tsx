@@ -11,6 +11,7 @@ import { adoptionPhoto } from '@/src/photos';
 import type { AdoptionListing } from '@/src/data';
 import { color, font, pastel, radius, shadow, space, type } from '@/src/theme';
 import { PastelBackdrop } from '@/src/PastelBackdrop';
+import { ProfileButton } from '@/src/ProfileButton';
 
 /**
  * Adoption (D94, D103, D125, D126, D135). Never on the distress map. No pet management.
@@ -26,9 +27,12 @@ export function AdoptionList({ mine, tab }: { mine?: boolean; tab?: boolean }) {
     <View style={{ flex: 1, backgroundColor: color.page, paddingTop: insets.top }}>
       {tab ? <PastelBackdrop variant="adoption" /> : null}
       {tab ? (
-        <View style={styles.tabHead}>
-          <Text style={type.display}>Adopt a pet</Text>
-          <Text style={type.label}>Rescued animals looking for a home near you</Text>
+        <View style={[styles.tabHead, { flexDirection: 'row', alignItems: 'flex-start', gap: space[3] }]}>
+          <View style={{ flex: 1, gap: 2 }}>
+            <Text style={type.display}>Adopt a pet</Text>
+            <Text style={type.label}>Rescued animals looking for a home near you</Text>
+          </View>
+          <ProfileButton />
         </View>
       ) : <ScreenHeader title={mine ? 'My adoption listings' : 'Adopt a pet'} />}
       <ScrollView contentContainerStyle={{ padding: space[5], paddingTop: tab ? space[3] : space[5], gap: space[4], paddingBottom: tab ? 130 : space[8] }} showsVerticalScrollIndicator={false}>

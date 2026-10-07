@@ -20,7 +20,7 @@ Read before making product decisions: `docs/01-product.md` … `docs/07-privacy-
 
 ### Documentation workflow
 
-- `docs/02-scope.md` holds the decision log (currently **D1–D140**). New decisions get the next D-number; older entries are never deleted, only annotated *AMENDED* / *SUPERSEDED* / *DEFERRED*. The latest decision wins.
+- `docs/02-scope.md` holds the decision log (currently **D1–D142**). New decisions get the next D-number; older entries are never deleted, only annotated *AMENDED* / *SUPERSEDED* / *DEFERRED*. The latest decision wins.
 - `docs/04-screens.md` is the screen inventory with stable IDs (PUBLIC-, AUTH-, REPORT-, RESP-, CHAT-, PROFILE-, ADOPT-, FOOD-, ORG-, ADMIN-, STATE-). Wireframe IDs appear in brackets.
 - **Low-fidelity wireframes (done; layout only, no visual design):**
   - `wireframes/01-home.md`: H1–H10 Home (Map/List, case sheet, list cards, empty, RESPONDER_TO_HOSPITAL, professional help active, status transitions, secondary access, signed-out browsing)
@@ -34,7 +34,7 @@ Read before making product decisions: `docs/01-product.md` … `docs/07-privacy-
 
 ### Current status and next steps
 
-Product definition and low-fidelity wireframes are complete up to **D140**; the citizen app prototype exists in `apps/mobile` (see its README). Suggested next steps, in order: final consistency check of docs + wireframes → admin wireframes → design system / visual design → clickable prototype or MVP build (demo mode). Before a real pilot: legal (DPDP), veterinary and operational validation (docs/07). Do not start code or visual design until the user asks.
+Product definition and low-fidelity wireframes are complete up to **D142**; the citizen app prototype exists in `apps/mobile` (see its README). Suggested next steps, in order: final consistency check of docs + wireframes → admin wireframes → design system / visual design → clickable prototype or MVP build (demo mode). Before a real pilot: legal (DPDP), veterinary and operational validation (docs/07). Do not start code or visual design until the user asks.
 
 ## Scope rules
 
@@ -92,7 +92,7 @@ Check current library docs before using APIs; do not rely on memory for Expo, Ne
 
 ## Design guardrails
 
-- **Navigation: Home | Adoption | (Report) | Donation | Profile (D139, D140; supersedes D48's two tabs).** Home is the default tab and stays emergency-first. The raised centre circle is a Report action (opens the report flow), not a tab; Home keeps its Report button. No My Reports, Responder, Community, Rewards or Chat tabs. Donation = product-based food donations only.
+- **Navigation: Home | Adoption | (Report) | Donation | FAQs (D139, D140, D142; supersedes D48's two tabs).** Home is the default tab and stays emergency-first. The raised centre circle is a Report action (opens the report flow), not a tab; Home keeps its Report button. Profile opens from the top-right button on every tab (D142). FAQs hold the "Who do I call?" questions with masked numbers (D141). No My Reports, Responder, Community, Rewards or Chat tabs. Donation = product-based food donations only.
 - Home hierarchy: 1 nearby animals in distress (Map/List) · 2 Report an animal in distress · 3 adoption · 4 food donation discovery · 5 Veterinary & Animal Organisations directory link (D128). Help & Safety is public (D129). Adoption listings and food donation requests never appear on the distress map/list.
 - Report flow: (account setup if signed out: name → email → mobile → email OTP) → Media (1–4; safety fallback only) → What's wrong? (+ optional "Tell us what you saw") → Where is it? → Mobile number → Send → (possible duplicate) → Report sent. Leaving a draft asks "Discard this report?". Submitted reports are locked; no extra evidence after submission.
 - Case Detail is action-first and stays the same through the lifecycle; only the status/action area changes. No likes, comments, feeds or engagement mechanics.

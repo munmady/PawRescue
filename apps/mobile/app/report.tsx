@@ -12,6 +12,7 @@ import {
 import { PROBLEMS, type ProblemCode, type Species } from '@animal/shared';
 import { AnimalPhoto, Button, FadeSlide, Pill, PressableScale, SheetDialog, StatusChip } from '@/src/ui';
 import { MapCanvas } from '@/src/MapCanvas';
+import { caseTitle } from '@/src/actions';
 import { Bullet, Divider, GroupLabel, StepCard, StepTracker, stepStyles } from '@/src/StepFlow';
 import { PHOTOS, type PhotoKey } from '@/src/photos';
 
@@ -304,7 +305,7 @@ function ReviewListing({
 }) {
   const [w, setW] = useState(0);
   const [page, setPage] = useState(0);
-  const title = species === 'dog' ? 'Injured dog' : species === 'cat' ? 'Injured cat' : 'Animal in distress';
+  const title = caseTitle(species, problems);
   const what = problems.map((p) => PROBLEMS.find((x) => x.code === p)?.label).filter(Boolean).join(' · ');
   return (
     <View style={{ gap: space[4] }}>

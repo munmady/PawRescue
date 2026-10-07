@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
   useAnimatedStyle, useReducedMotion, useSharedValue, withSequence, withSpring, withTiming,
 } from 'react-native-reanimated';
-import { House, PawPrint, User } from 'lucide-react-native';
+import { CircleHelp, House, PawPrint } from 'lucide-react-native';
 import { FoodPacketIcon } from '@/src/FoodPacketIcon';
 
 type IconType = ComponentType<{ size?: number; color?: string; strokeWidth?: number }>;
@@ -18,14 +18,15 @@ import { GradientFill } from '@/src/PastelBackdrop';
 import { PressableScale } from '@/src/ui';
 
 /**
- * Navigation: Home | Adoption | [Report] | Donation | Profile (D139, D140).
+ * Navigation: Home | Adoption | [Report] | Donation | FAQs (D139, D140, D142).
+ * Profile opens from the top-right button on each tab (D142).
  * The raised centre circle is an action, not a tab: it opens the report flow.
  */
 const ITEMS: Record<string, { label: string; Icon: IconType }> = {
   index: { label: 'Home', Icon: House },
   adoption: { label: 'Adopt', Icon: PawPrint },
   donations: { label: 'Donate', Icon: FoodPacketIcon },
-  profile: { label: 'Profile', Icon: User },
+  faqs: { label: 'FAQs', Icon: CircleHelp },
 };
 
 const PAD = 6;
@@ -140,7 +141,7 @@ export default function TabLayout() {
       <Tabs.Screen name="index" options={{ title: 'Home' }} />
       <Tabs.Screen name="adoption" options={{ title: 'Adopt' }} />
       <Tabs.Screen name="donations" options={{ title: 'Donate' }} />
-      <Tabs.Screen name="profile" options={{ title: 'Profile' }} />
+      <Tabs.Screen name="faqs" options={{ title: 'FAQs' }} />
     </Tabs>
   );
 }

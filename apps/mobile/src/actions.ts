@@ -1,6 +1,21 @@
 import { Share } from 'react-native';
-import { PROBLEMS, statusLabel } from '@animal/shared';
+import { PROBLEMS, statusLabel, type ProblemCode, type Species } from '@animal/shared';
 import type { Case } from './data';
+
+/** A descriptive case title from the animal and its main problem, e.g. "Trapped dog", "Cat unable to walk". */
+export function caseTitle(species: Species | null, problems: ProblemCode[]) {
+  const a = species === 'dog' ? 'dog' : species === 'cat' ? 'cat' : 'animal';
+  const A = a[0].toUpperCase() + a.slice(1);
+  switch (problems[0]) {
+    case 'hit_by_vehicle': return `${A} hit by a vehicle`;
+    case 'bleeding': return `Injured ${a}`;
+    case 'cant_walk': return `${A} unable to walk`;
+    case 'not_responding': return `Unresponsive ${a}`;
+    case 'very_sick': return `Sick ${a}`;
+    case 'trapped': return `Trapped ${a}`;
+    default: return `${A} in distress`;
+  }
+}
 
 export function problemText(c: Case) {
   return c.problems.map((p) => PROBLEMS.find((x) => x.code === p)?.label ?? p).join(', ');

@@ -7,6 +7,7 @@ import {
   type AdoptionListing, type AdoptionMessage, type Case, type ChatMessage, type Donation, type FoodRequest,
 } from './data';
 import { adoptionReply, caseReplies, typingDelay } from './chatReplies';
+import { caseTitle } from './actions';
 
 export interface Account {
   name: string;
@@ -107,7 +108,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const id = `AR-${10250 + (seq.current++ - 1000)}`;
     const c: Case = {
       id, species: r.species,
-      title: r.species === 'dog' ? 'Injured dog' : r.species === 'cat' ? 'Injured cat' : 'Animal in distress',
+      title: caseTitle(r.species, r.problems),
       problems: r.problems, description: r.description || 'No details added.', area: r.area, landmark: r.landmark,
       distanceM: 120, x: 52, y: 46, status: 'NEW', reportedAt: Date.now(), reporterId: SEED_USER_ID,
       evidence: r.evidence, photos: r.photos, voiceNoteSeconds: r.voiceNoteSeconds, noMedia: r.noMedia,
