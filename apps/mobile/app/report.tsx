@@ -218,7 +218,7 @@ export default function Report() {
         <Text style={type.title}>We may already have this animal&apos;s case.</Text>
         <Text style={type.body}>Someone has reported an animal in this area and help may already be on the way.</Text>
         <View style={styles.dupCase}>
-          <AnimalPhoto species="dog" photo={PHOTOS['dog-leg-wound']} sensitive style={{ width: 52, height: 52 }} iconSize={24} />
+          <AnimalPhoto species="dog" photo={PHOTOS['dog-leg-wound']} style={{ width: 52, height: 52 }} iconSize={24} />
           <View style={{ flex: 1 }}>
             <Text style={type.section}>Injured dog · Andheri East</Text>
             <Text style={type.caption}>Looking for help · reported 12 min ago</Text>

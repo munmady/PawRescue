@@ -145,7 +145,7 @@ export const SEED_CASES: Case[] = [
     id: 'AR-10245', species: 'dog', title: 'Injured dog', problems: ['hit_by_vehicle'],
     description: 'The dog appears to have an injured rear leg and is lying near the bus stop.',
     area: 'Andheri East', landmark: 'Near Hill Road bus stop', distanceM: 850, x: 30, y: 30,
-    status: 'NEW', reportedAt: now - 12 * min, reporterId: 'u-neha', evidence: 3, photos: ['dog-leg-wound', 'dog-leg-wound-closeup', 'dog-leg-wound-face'], voiceNoteSeconds: 21, sensitive: true,
+    status: 'NEW', reportedAt: now - 12 * min, reporterId: 'u-neha', evidence: 3, photos: ['dog-leg-wound', 'dog-leg-wound-closeup', 'dog-leg-wound-face'], voiceNoteSeconds: 21,
     events: [{ at: now - 12 * min, label: 'Reported' }],
   },
   {
@@ -194,7 +194,7 @@ export const SEED_CASES: Case[] = [
     description: 'Dog with a wound near its eye, lying by a parked car. The rescue team searched the area.',
     area: 'Chakala', distanceM: 1500, x: 58, y: 44,
     status: 'CLOSED', outcome: 'not_found', closedAt: now - 30 * min,
-    organisationName: 'Lumen Animal Rescue & Shelter', reportedAt: now - 2 * 60 * min, reporterId: 'u-neha', evidence: 1, photos: ['dog-head-wound'], sensitive: true,
+    organisationName: 'Lumen Animal Rescue & Shelter', reportedAt: now - 2 * 60 * min, reporterId: 'u-neha', evidence: 1, photos: ['dog-head-wound'],
     events: [
       { at: now - 120 * min, label: 'Reported' },
       { at: now - 90 * min, label: 'Accepted by Lumen Animal Rescue & Shelter' },
