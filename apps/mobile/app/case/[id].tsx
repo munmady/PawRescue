@@ -3,10 +3,11 @@ import { ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-n
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown, useAnimatedStyle, useSharedValue, withTiming, Easing } from 'react-native-reanimated';
-import { Ellipsis, MapPin, MessageCircle, Navigation, Pause, Phone, Play, Share2, Siren } from 'lucide-react-native';
-import { canReporterCancel, canTakeMeToAnimal, isProfessionalActive, statusTone } from '@animal/shared';
+import { BadgeCheck, Ellipsis, MapPin, MessageCircle, Navigation, Pause, Phone, Play, Share2, type LucideIcon } from 'lucide-react-native';
+import { canReporterCancel, canTakeMeToAnimal, isProfessionalActive, statusLabel, statusTone } from '@animal/shared';
 import { casePhoto } from '@/src/photos';
-import { AnimalPhoto, Button, PressableScale, ScreenHeader, SheetDialog, StatusChip } from '@/src/ui';
+import { AnimalPhoto, Button, PressableScale, ScreenHeader, SheetDialog, StatusChip, statusIcon } from '@/src/ui';
+import { MapCanvas } from '@/src/MapCanvas';
 import { distanceLabel, timeAgo, useCase, useStore } from '@/src/store';
 import { DEMO_CALL, problemText, shareCase } from '@/src/actions';
 import { SEED_USER_ID } from '@/src/data';
@@ -35,6 +36,7 @@ export default function CaseDetail() {
   const mine = c.reporterId === SEED_USER_ID || reportedIds.includes(c.id);
   const transporter = transportedIds.includes(c.id);
   const official = [...chats].reverse().find((m) => m.caseId === c.id && m.official);
+  const messageCount = chats.filter((m) => m.caseId === c.id && !m.official).length;
   const photoW = Math.min(width, 440) - space[5] * 2;
   const tone = toneColors[statusTone(c)];
   const takeMe = () => requireAccount('Sign in to help this animal', () => router.push(`/respond/${c.id}`));
@@ -49,64 +51,107 @@ export default function CaseDetail() {
           </PressableScale>
         ) : undefined}
       />
-      <ScrollView contentContainerStyle={{ paddingHorizontal: space[5], paddingBottom: space[8], gap: space[4] }}>
-        <Animated.View entering={FadeInDown.duration(300)}>
-          <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} onScroll={(e) => setPage(Math.round(e.nativeEvent.contentOffset.x / photoW))} scrollEventThrottle={32} style={{ borderRadius: radius.lg }}>
+      <ScrollView contentContainerStyle={{ paddingHorizontal: space[5], paddingBottom: space[8], gap: space[3] }} showsVerticalScrollIndicator={false}>
+        {/* 1 · Evidence */}
+        <Animated.View entering={FadeInDown.duration(300)} style={styles.gallery}>
+          <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} onScroll={(e) => setPage(Math.round(e.nativeEvent.contentOffset.x / photoW))} scrollEventThrottle={32}>
             {Array.from({ length: Math.max(1, c.evidence) }).map((_, i) => (
-              <AnimalPhoto key={i} species={c.species} photo={casePhoto(c, i)} sensitive={c.sensitive} revealed={revealed} onReveal={() => setRevealed(true)} iconSize={72} style={{ width: photoW, height: 250, borderRadius: radius.lg }} />
+              <AnimalPhoto key={i} species={c.species} photo={casePhoto(c, i)} sensitive={c.sensitive} revealed={revealed} onReveal={() => setRevealed(true)} iconSize={72} style={{ width: photoW, height: 260, borderRadius: 0 }} />
             ))}
           </ScrollView>
           {c.evidence > 1 ? (
-            <View style={styles.dots}>
+            <View style={styles.dots} pointerEvents="none">
               {Array.from({ length: c.evidence }).map((_, i) => <View key={i} style={[styles.dot, i === page && styles.dotOn]} />)}
             </View>
           ) : null}
-          {c.noMedia ? <Text style={[type.caption, { marginTop: 6 }]}>No media: the reporter couldn&apos;t capture it safely.</Text> : null}
         </Animated.View>
 
-        {c.voiceNoteSeconds ? <VoiceNote seconds={c.voiceNoteSeconds} /> : null}
-
-        <Animated.View entering={FadeInDown.delay(80).duration(300)} style={{ gap: space[2] }}>
+        {/* 2 · Summary (overlaps the photo slightly) */}
+        <Animated.View entering={FadeInDown.delay(60).duration(300)} style={[styles.card, styles.summary]}>
           <StatusChip c={c} />
-          <Text style={type.display}>{c.title}</Text>
-          <View style={styles.metaRow}>
-            <MapPin size={15} color={color.inkSecondary} />
-            <Text style={type.label}>{c.landmark ? `${c.landmark}, ` : ''}{c.area} · {distanceLabel(c.distanceM)}</Text>
+          <View style={{ gap: 2 }}>
+            <Text style={type.display}>{c.title}</Text>
+            <Text style={type.caption}>Reported {timeAgo(c.reportedAt)} · Case {c.id}</Text>
           </View>
-          <Text style={[type.section, { color: color.ink }]}>{problemText(c)}</Text>
-          <Text style={type.body}>{c.description}</Text>
+          <View style={styles.tags}>
+            <View style={styles.tag}><Text style={styles.tagText}>{problemText(c)}</Text></View>
+            <View style={[styles.tag, styles.tagQuiet]}>
+              <MapPin size={13} color={color.inkSecondary} />
+              <Text style={[styles.tagText, { color: color.inkSecondary }]}>{c.area} · {distanceLabel(c.distanceM)}</Text>
+            </View>
+          </View>
+          {c.noMedia ? <Text style={type.caption}>No media: the reporter couldn&apos;t capture it safely.</Text> : null}
         </Animated.View>
 
-        <Animated.View entering={FadeInDown.delay(140).duration(300)} style={[styles.actionCard, { borderColor: tone.bg }]}>
+        {/* 3 · Status and action */}
+        <Animated.View entering={FadeInDown.delay(110).duration(300)} style={[styles.card, { borderWidth: 1.5, borderColor: tone.bg }]}>
           <StatusMessage />
           {c.status === 'NEW' ? <Button label="Take me to the animal" icon={Navigation} onPress={takeMe} /> : null}
           {isProfessionalActive(c) && canTakeMeToAnimal(c) ? <Button label="Take me to the animal (navigation only)" variant="outline" icon={Navigation} onPress={takeMe} /> : null}
           {mine && (c.status === 'ACCEPTED' || c.status === 'ON_THE_WAY') ? <Button label="Call the organisation" variant="link" icon={Phone} onPress={() => showToast(DEMO_CALL)} /> : null}
         </Animated.View>
 
-        <View style={{ flexDirection: 'row', gap: space[2] }}>
-          <Button label="Share" icon={Share2} variant="outline" onPress={() => shareCase(c, showToast)} style={{ flex: 1 }} full={false} />
-          <Button label="Case chat" icon={MessageCircle} variant="quiet" onPress={() => router.push(`/case/chat/${c.id}`)} style={{ flex: 1 }} full={false} />
-        </View>
+        {/* 4 · Quick actions */}
+        <Animated.View entering={FadeInDown.delay(150).duration(300)} style={styles.quickRow}>
+          <QuickTile icon={Share2} label="Share" sub="Send link" onPress={() => shareCase(c, showToast)} />
+          <QuickTile icon={MessageCircle} label="Case chat" sub={messageCount ? `${messageCount} message${messageCount === 1 ? '' : 's'}` : 'Start the conversation'} onPress={() => router.push(`/case/chat/${c.id}`)} />
+        </Animated.View>
 
+        {/* 5 · What the reporter saw */}
+        <Animated.View entering={FadeInDown.delay(190).duration(300)} style={styles.card}>
+          <Text style={styles.cardTitle}>What the reporter saw</Text>
+          <Text style={[type.body, { color: color.ink }]}>{c.description}</Text>
+          {c.voiceNoteSeconds ? <VoiceNote seconds={c.voiceNoteSeconds} /> : null}
+        </Animated.View>
+
+        {/* 6 · Location */}
+        <Animated.View entering={FadeInDown.delay(230).duration(300)} style={styles.card}>
+          <Text style={styles.cardTitle}>Location</Text>
+          <View style={styles.miniMap} pointerEvents="none">
+            {/* Keep the pin fully inside this small map (it's an illustration, not to scale). */}
+            <MapCanvas cases={[{ ...c, x: Math.min(82, Math.max(18, c.x)), y: Math.min(85, Math.max(60, c.y)) }]} onSelect={() => {}} />
+          </View>
+          <View style={styles.addrRow}>
+            <View style={styles.addrIcon}><MapPin size={16} color={color.action} /></View>
+            <View style={{ flex: 1 }}>
+              <Text style={[type.section, { fontSize: 14 }]}>{c.landmark ?? c.area}</Text>
+              <Text style={type.caption}>{c.landmark ? `${c.area} · ` : ''}{distanceLabel(c.distanceM)} from you</Text>
+            </View>
+          </View>
+        </Animated.View>
+
+        {/* 7 · Official update */}
         {official ? (
-          <Animated.View entering={FadeInDown.delay(180)} style={styles.official}>
-            <Text style={styles.officialLabel}>OFFICIAL UPDATE · {official.orgName?.toUpperCase()}</Text>
-            <Text style={[type.label, { color: color.ink }]}>{official.text}</Text>
+          <Animated.View entering={FadeInDown.delay(260)} style={styles.official}>
+            <View style={styles.officialIcon}><BadgeCheck size={16} color={color.infoInk} /></View>
+            <View style={{ flex: 1, gap: 2 }}>
+              <Text style={styles.officialLabel}>Official update · {official.orgName}</Text>
+              <Text style={[type.label, { color: color.ink }]}>{official.text}</Text>
+            </View>
           </Animated.View>
         ) : null}
 
-        <View style={{ gap: space[3] }}>
-          <Text style={type.section}>Case history</Text>
-          {c.events.map((e, i) => (
-            <Animated.View key={`${e.at}-${i}`} entering={FadeInDown.delay(200 + i * 40)} style={styles.event}>
-              <View style={[styles.eventDot, i === c.events.length - 1 && { backgroundColor: tone.marker }]} />
-              <Text style={[type.label, { flex: 1, color: color.ink }]}>{e.label}</Text>
-              <Text style={type.caption}>{timeAgo(e.at)}</Text>
-            </Animated.View>
-          ))}
-        </View>
-        <Text style={[type.caption, { color: color.inkMuted }]}>Case {c.id}</Text>
+        {/* 8 · Case history timeline */}
+        <Animated.View entering={FadeInDown.delay(290).duration(300)} style={styles.card}>
+          <Text style={styles.cardTitle}>Case history</Text>
+          <View>
+            {[...c.events].reverse().map((e, i, arr) => {
+              const latest = i === 0;
+              return (
+                <View key={`${e.at}-${i}`} style={styles.tlRow}>
+                  <View style={styles.tlRail}>
+                    <View style={[styles.tlDot, latest && { backgroundColor: tone.marker, borderColor: tone.bg }]} />
+                    {i < arr.length - 1 ? <View style={styles.tlLine} /> : null}
+                  </View>
+                  <View style={styles.tlBody}>
+                    <Text style={[type.label, { color: color.ink }, latest && { fontFamily: font.bold }]}>{e.label}</Text>
+                    <Text style={type.caption}>{timeAgo(e.at)}</Text>
+                  </View>
+                </View>
+              );
+            })}
+          </View>
+        </Animated.View>
       </ScrollView>
 
       <SheetDialog visible={menu} onClose={() => setMenu(false)}>
@@ -133,32 +178,45 @@ export default function CaseDetail() {
 
   function StatusMessage() {
     if (!c) return null;
-    let head = '';
+    // Headline uses the exact status wording from packages/shared (same as the chips on Home).
+    const head = c.deathReportedPending ? 'Passed away — awaiting confirmation' : statusLabel(c);
     let body = '';
-    if (c.deathReportedPending) { head = 'Passed away — awaiting confirmation'; body = 'Someone has reported that this animal has passed away. Waiting for a veterinary hospital or rescue organisation to confirm.'; }
+    if (c.deathReportedPending) body = 'Someone has reported that this animal has passed away. Waiting for a veterinary hospital or rescue organisation to confirm.';
     else switch (c.status) {
-      case 'NEW': head = 'This animal needs help'; body = 'No rescue team has accepted yet. If it’s safe for you, you can go to the animal.'; break;
-      case 'ACCEPTED': head = 'Professional help is on the way'; body = `Accepted by ${c.organisationName}. You can still share useful information.`; break;
-      case 'ON_THE_WAY': head = `Help is approximately ${c.etaMinutes} min away`; body = `${c.organisationName} is on the way.`; break;
-      case 'ON_SITE': head = 'The rescue team is with the animal'; break;
-      case 'TO_HOSPITAL': head = 'The rescue team is taking the animal to hospital'; break;
-      case 'RESPONDER_TO_HOSPITAL': head = 'This animal is being taken to a veterinary hospital'; body = c.hospitalName ? `To: ${c.hospitalName}` : ''; break;
-      case 'AT_HOSPITAL': head = `The animal arrived at ${c.hospitalName ?? 'the hospital'}`; break;
-      case 'IN_CARE': head = 'Under treatment'; break;
-      case 'CLOSED': head = c.outcome === 'not_found' ? 'The team couldn’t find this animal' : 'This case is closed'; body = c.outcome === 'not_found' ? 'If you see it, share where in the case chat.' : 'Thank you for stopping to help.'; break;
-      case 'CANCELLED': head = 'This report was cancelled'; body = 'Rescue teams are no longer being alerted.'; break;
+      case 'NEW': body = 'No rescue team has accepted yet. If it’s safe for you, you can go to the animal.'; break;
+      case 'ACCEPTED': body = 'Professional help is on the way. You can still share useful information in the case chat.'; break;
+      case 'ON_THE_WAY': body = `${c.organisationName ?? 'The rescue team'} is on the way.`; break;
+      case 'ON_SITE': body = 'The rescue team is with the animal.'; break;
+      case 'TO_HOSPITAL': body = 'The rescue team is taking the animal to hospital.'; break;
+      case 'RESPONDER_TO_HOSPITAL': body = c.hospitalName ? `A community responder is taking this animal to ${c.hospitalName}.` : 'A community responder is taking this animal to a veterinary hospital.'; break;
+      case 'AT_HOSPITAL': body = `The animal arrived at ${c.hospitalName ?? 'the hospital'}.`; break;
+      case 'IN_CARE': body = 'The animal is being treated.'; break;
+      case 'CLOSED': body = c.outcome === 'not_found' ? 'The team couldn’t find this animal. If you see it, share where in the case chat.' : 'Thank you for stopping to help.'; break;
+      case 'CANCELLED': body = 'Rescue teams are no longer being alerted.'; break;
     }
+    const StatusIcon = statusIcon(c);
     return (
-      <View style={{ gap: 4 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          {c.status === 'NEW' ? <Siren size={18} color={color.urgent} /> : null}
-          <Text style={[type.section, c.status === 'NEW' && { color: color.urgent }]}>{head}</Text>
+      <View style={styles.statusRow}>
+        <View style={[styles.statusIcon, { backgroundColor: tone.bg }]}><StatusIcon size={18} color={tone.fg} strokeWidth={2.2} /></View>
+        <View style={{ flex: 1, gap: 3 }}>
+          <Text style={[type.section, { color: c.status === 'NEW' ? color.urgent : color.ink }]}>{head}</Text>
+          {body ? <Text style={type.label}>{body}</Text> : null}
         </View>
-        {body ? <Text style={type.label}>{body}</Text> : null}
-        <Text style={type.caption}>Reported {timeAgo(c.reportedAt)}</Text>
       </View>
     );
   }
+}
+
+function QuickTile({ icon: Icon, label, sub, onPress }: { icon: LucideIcon; label: string; sub: string; onPress: () => void }) {
+  return (
+    <PressableScale onPress={onPress} accessibilityLabel={label} style={styles.quick} scaleTo={0.97}>
+      <View style={styles.quickIcon}><Icon size={18} color={color.action} /></View>
+      <View style={{ flex: 1, minWidth: 0 }}>
+        <Text style={[type.section, { fontSize: 14 }]} numberOfLines={1}>{label}</Text>
+        <Text style={type.caption} numberOfLines={1}>{sub}</Text>
+      </View>
+    </PressableScale>
+  );
 }
 
 function VoiceNote({ seconds }: { seconds: number }) {
@@ -185,17 +243,36 @@ function VoiceNote({ seconds }: { seconds: number }) {
 
 const styles = StyleSheet.create({
   iconBtn: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
-  dots: { flexDirection: 'row', justifyContent: 'center', gap: 6, marginTop: space[2] },
-  dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: color.line },
-  dotOn: { width: 18, backgroundColor: color.primary },
-  metaRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  actionCard: { backgroundColor: color.surface, borderRadius: radius.md, padding: space[4], gap: space[3], borderWidth: 1.5, ...shadow.card },
-  official: { backgroundColor: color.surfaceTint, borderRadius: radius.md, padding: space[4], gap: 4 },
-  officialLabel: { fontFamily: font.extrabold, fontSize: 11, letterSpacing: 0.6, color: color.infoInk },
-  event: { flexDirection: 'row', alignItems: 'center', gap: space[3] },
-  eventDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: color.line },
-  voice: { flexDirection: 'row', alignItems: 'center', gap: space[3], backgroundColor: color.surface, borderRadius: radius.pill, padding: 6, paddingRight: space[4], ...shadow.card },
+  gallery: { borderRadius: radius.lg, overflow: 'hidden', backgroundColor: color.surfaceTint },
+  dots: { position: 'absolute', bottom: 36, left: 0, right: 0, flexDirection: 'row', justifyContent: 'center', gap: 6 },
+  dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: 'rgba(255,255,255,0.65)' },
+  dotOn: { width: 18, backgroundColor: '#ffffff' },
+  card: { backgroundColor: color.surface, borderRadius: 20, padding: space[4], gap: space[3], borderWidth: 1, borderColor: color.line, ...shadow.card },
+  summary: { marginTop: -28, marginHorizontal: space[2] },
+  cardTitle: { fontFamily: font.headingBold, fontSize: 15, color: color.ink },
+  rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space[2] },
+  tags: { flexDirection: 'row', flexWrap: 'wrap', gap: space[2] },
+  tag: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 5, borderRadius: radius.pill, backgroundColor: color.surfaceTint },
+  tagQuiet: { backgroundColor: color.fill },
+  tagText: { fontFamily: font.semibold, fontSize: 12.5, color: color.infoInk },
+  statusRow: { flexDirection: 'row', alignItems: 'flex-start', gap: space[3] },
+  statusIcon: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center' },
+  quickRow: { flexDirection: 'row', gap: space[3] },
+  quick: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: space[3], backgroundColor: color.surface, borderRadius: 18, padding: space[3], borderWidth: 1, borderColor: color.line, ...shadow.card },
+  quickIcon: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center', backgroundColor: color.surfaceTint },
+  miniMap: { height: 140, borderRadius: radius.md, overflow: 'hidden' },
+  addrRow: { flexDirection: 'row', alignItems: 'center', gap: space[3] },
+  addrIcon: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center', backgroundColor: color.surfaceTint },
+  official: { flexDirection: 'row', gap: space[3], backgroundColor: color.surfaceTint, borderRadius: 20, padding: space[4], borderWidth: 1, borderColor: '#cfe7f8' },
+  officialIcon: { width: 30, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center', backgroundColor: '#ffffff' },
+  officialLabel: { fontFamily: font.bold, fontSize: 12, color: color.infoInk },
+  tlRow: { flexDirection: 'row', gap: space[3] },
+  tlRail: { width: 14, alignItems: 'center' },
+  tlDot: { width: 12, height: 12, borderRadius: 6, marginTop: 3, backgroundColor: color.line, borderWidth: 2, borderColor: '#ffffff' },
+  tlLine: { flex: 1, width: 2, backgroundColor: color.line, marginVertical: 2 },
+  tlBody: { flex: 1, paddingBottom: space[3], gap: 1 },
+  voice: { flexDirection: 'row', alignItems: 'center', gap: space[3], backgroundColor: color.fill, borderRadius: radius.pill, padding: 6, paddingRight: space[4] },
   play: { width: 36, height: 36, borderRadius: 18, backgroundColor: color.action, alignItems: 'center', justifyContent: 'center' },
-  track: { flex: 1, height: 6, borderRadius: 3, backgroundColor: color.surfaceTint, overflow: 'hidden' },
+  track: { flex: 1, height: 6, borderRadius: 3, backgroundColor: '#dbe8f3', overflow: 'hidden' },
   trackFill: { height: 6, backgroundColor: color.primary },
 });

@@ -1,7 +1,7 @@
-import { useEffect, type ComponentType } from 'react';
+import { useEffect, useRef, type ComponentType } from 'react';
 import { router } from 'expo-router';
 import { Tabs, type BottomTabBarProps } from 'expo-router/js-tabs';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
   useAnimatedStyle, useReducedMotion, useSharedValue, withSequence, withSpring, withTiming,
@@ -12,7 +12,8 @@ import { FoodPacketIcon } from '@/src/FoodPacketIcon';
 type IconType = ComponentType<{ size?: number; color?: string; strokeWidth?: number }>;
 import { color, font } from '@/src/theme';
 import { useStore } from '@/src/store';
-import { AnimalFacesIcon } from '@/src/AnimalFacesIcon';
+import { ReportBadge } from '@/src/ReportBadge';
+import { BlurView } from 'expo-blur';
 import { PressableScale } from '@/src/ui';
 
 /**
@@ -33,6 +34,12 @@ function TabBar({ state, navigation }: BottomTabBarProps) {
   return (
     <View style={[styles.wrap, { paddingBottom: Math.max(insets.bottom, 12) }]} pointerEvents="box-none">
       <View style={styles.bar} accessibilityRole="tablist">
+        {/* Dark blue glass: content behind is blurred (iOS/web) under a deep-blue tint.
+            Clipped in its own layer so the raised Report circle isn't cut off. */}
+        <View pointerEvents="none" style={styles.barBg}>
+          <GlassBlur />
+          <View style={styles.barTint} />
+        </View>
         {state.routes.map((route, i) => {
           const item = ITEMS[route.name];
           if (!item) return null;
@@ -64,7 +71,7 @@ function Tab({ label, Icon, focused, onPress }: { label: string; Icon: IconType;
   }, [focused, reduce, s]);
   const pop = useAnimatedStyle(() => ({ transform: [{ scale: s.value }] }));
   // The selected tab is shown by colour only (icon + label), no background.
-  const fg = focused ? color.action : color.inkMuted;
+  const fg = focused ? '#ffffff' : 'rgba(255,255,255,0.62)';
   return (
     <Pressable
       onPress={onPress}
@@ -81,6 +88,23 @@ function Tab({ label, Icon, focused, onPress }: { label: string; Icon: IconType;
   );
 }
 
+/**
+ * Background blur for the glass bar. Native: expo-blur's BlurView. Web: the
+ * browser's backdrop-filter set on the DOM node (react-native-web drops it as a style).
+ */
+function GlassBlur() {
+  const ref = useRef<View>(null);
+  useEffect(() => {
+    if (Platform.OS !== 'web') return;
+    const el = ref.current as unknown as HTMLElement | null;
+    if (!el) return;
+    el.style.setProperty('backdrop-filter', 'blur(18px) saturate(160%)');
+    el.style.setProperty('-webkit-backdrop-filter', 'blur(18px) saturate(160%)');
+  }, []);
+  if (Platform.OS === 'web') return <View ref={ref} style={StyleSheet.absoluteFill} />;
+  return <BlurView intensity={40} tint="dark" style={StyleSheet.absoluteFill} />;
+}
+
 /** Raised centre action (D140): opens Report an animal in distress from any tab. */
 function ReportButton() {
   const { requireAccount } = useStore();
@@ -93,7 +117,7 @@ function ReportButton() {
           style={styles.reportBtn}
           scaleTo={0.92}
         >
-          <AnimalFacesIcon size={26} color={color.ink} strokeWidth={2.2} />
+          <ReportBadge size={54} />
         </PressableScale>
       </View>
       {/* Same stack as a tab (icon-sized spacer + label) so "Report" shares their baseline. */}
@@ -117,9 +141,11 @@ export default function TabLayout() {
 const styles = StyleSheet.create({
   wrap: { position: 'absolute', left: 0, right: 0, bottom: 0, paddingHorizontal: 14, paddingTop: 8 },
   bar: {
-    flexDirection: 'row', padding: PAD, borderRadius: 30, backgroundColor: 'rgba(255,255,255,0.97)',
-    borderWidth: 1, borderColor: color.line, boxShadow: '0 12px 32px rgba(47,58,76,0.16), 0 2px 6px rgba(47,58,76,0.06)',
+    flexDirection: 'row', padding: PAD, borderRadius: 30,
+    boxShadow: '0 14px 34px rgba(10,24,60,0.35), 0 2px 6px rgba(10,24,60,0.18)',
   },
+  barTint: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(18,38,86,0.52)' },
+  barBg: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, borderRadius: 30, overflow: 'hidden' },
   tab: { flex: 1, height: 56, alignItems: 'center', justifyContent: 'center', gap: 3 },
   label: { fontFamily: font.semibold, fontSize: 11.5, letterSpacing: 0.1 },
   labelOn: { fontFamily: font.bold },
@@ -127,8 +153,8 @@ const styles = StyleSheet.create({
   iconSpacer: { width: 21, height: 21 },
   reportLift: { position: 'absolute', top: -36, alignSelf: 'center' },
   reportBtn: {
-    width: 62, height: 62, borderRadius: 31, alignItems: 'center', justifyContent: 'center',
+    width: 62, height: 62, borderRadius: 31, alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
     backgroundColor: '#ffe14d', borderWidth: 4, borderColor: '#ffffff', boxShadow: '0 8px 20px rgba(230, 185, 0, 0.40)',
   },
-  reportLabel: { color: color.ink, fontFamily: font.bold },
+  reportLabel: { color: '#ffffff', fontFamily: font.bold },
 });

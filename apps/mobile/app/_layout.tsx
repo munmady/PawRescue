@@ -4,9 +4,8 @@ import { DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import {
-  useFonts, NunitoSans_400Regular, NunitoSans_600SemiBold, NunitoSans_700Bold, NunitoSans_800ExtraBold,
-} from '@expo-google-fonts/nunito-sans';
-import { Nunito_700Bold, Nunito_800ExtraBold } from '@expo-google-fonts/nunito';
+  useFonts, PlusJakartaSans_400Regular, PlusJakartaSans_600SemiBold, PlusJakartaSans_700Bold, PlusJakartaSans_800ExtraBold,
+} from '@expo-google-fonts/plus-jakarta-sans';
 import 'react-native-reanimated';
 
 import { StoreProvider } from '@/src/store';
@@ -25,7 +24,7 @@ const theme = {
 };
 
 export default function RootLayout() {
-  const [loaded, error] = useFonts({ NunitoSans_400Regular, NunitoSans_600SemiBold, NunitoSans_700Bold, NunitoSans_800ExtraBold, Nunito_700Bold, Nunito_800ExtraBold });
+  const [loaded, error] = useFonts({ PlusJakartaSans_400Regular, PlusJakartaSans_600SemiBold, PlusJakartaSans_700Bold, PlusJakartaSans_800ExtraBold });
 
   useEffect(() => {
     if (error) throw error;

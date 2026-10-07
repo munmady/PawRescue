@@ -12,6 +12,7 @@ import {
 import { statusLabel, statusTone, type CaseLike, type Species } from '@animal/shared';
 import { color, font, radius, shadow, space, toneColors, type } from './theme';
 import { useStore } from './store';
+import { GradientFill } from './PastelBackdrop';
 
 /* ---------- Pressable with a gentle scale on press ---------- */
 export function PressableScale({
@@ -81,12 +82,15 @@ export function statusIcon(c: CaseLike): LucideIcon {
 }
 
 export function StatusChip({ c, size = 'md', label }: { c: CaseLike; size?: 'sm' | 'md'; label?: string }) {
-  const tone = toneColors[statusTone(c)];
+  const toneName = statusTone(c);
+  const tone = toneColors[toneName];
   const Icon = statusIcon(c);
   const sm = size === 'sm';
   return (
-    <Animated.View key={c.status} entering={FadeIn.duration(250)} style={[styles.chip, { backgroundColor: tone.bg, paddingVertical: sm ? 3 : 5 }]}>
-      <Icon size={sm ? 13 : 15} color={tone.fg} strokeWidth={2.2} />
+    <Animated.View key={c.status} entering={FadeIn.duration(250)} style={[styles.chip, { paddingVertical: sm ? 3 : 5 }]}>
+      {/* Fades from the status colour to white, like the Home tile pills. */}
+      <GradientFill colors={[tone.bg, '#ffffff']} id={`chip-${toneName}`} horizontal />
+      <View><Icon size={sm ? 13 : 15} color={tone.fg} strokeWidth={2.2} /></View>
       <Text numberOfLines={2} style={[styles.chipText, { color: tone.fg, fontSize: sm ? 11.5 : 12.5 }]}>{label ?? statusLabel(c)}</Text>
     </Animated.View>
   );
@@ -252,7 +256,7 @@ export function FadeSlide({ children, k }: { children: ReactNode; k: string | nu
 
 export const styles = StyleSheet.create({
   btn: { minHeight: 50, borderRadius: radius.pill, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space[2], paddingHorizontal: space[5] },
-  chip: { flexDirection: 'row', alignItems: 'center', gap: 5, alignSelf: 'flex-start', paddingHorizontal: 10, borderRadius: radius.pill, maxWidth: '100%' },
+  chip: { flexDirection: 'row', alignItems: 'center', gap: 5, alignSelf: 'flex-start', paddingHorizontal: 10, borderRadius: radius.pill, maxWidth: '100%', overflow: 'hidden' },
   chipText: { fontFamily: font.bold, lineHeight: 16, flexShrink: 1 },
   photo: { backgroundColor: color.surfaceTint, borderRadius: radius.sm, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
   photoHalo: { position: 'absolute', width: '70%', aspectRatio: 1, borderRadius: 999, backgroundColor: '#ffffff', opacity: 0.55 },

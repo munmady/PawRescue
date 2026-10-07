@@ -44,6 +44,14 @@ export const FOOD_PHOTOS = {
 
 export type FoodPhotoKey = keyof typeof FOOD_PHOTOS;
 
+/** Cut-out images on white for the Home promo tiles (from media/). */
+export const PROMO_PHOTOS = {
+  kitten: require('../assets/promo/kitten-tabby-cutout.jpg'),
+  petFood: require('../assets/promo/pet-food-display.jpg'),
+  vets: require('../assets/promo/vets-pets-kit.jpg'),
+  safety: require('../assets/promo/safety-kit.jpg'),
+} satisfies Record<string, ImageSourcePropType>;
+
 export function adoptionPhoto(a: { photo?: AdoptionPhotoKey }): ImageSourcePropType | undefined {
   return a.photo ? ADOPTION_PHOTOS[a.photo] : undefined;
 }

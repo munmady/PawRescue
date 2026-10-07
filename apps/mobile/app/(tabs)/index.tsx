@@ -1,18 +1,17 @@
-import { useMemo, useState, type ComponentType } from 'react';
-import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { useMemo, useState } from 'react';
+import { Image, ScrollView, StyleSheet, Text, useWindowDimensions, View, type ImageSourcePropType, type ImageStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import Animated, {
   FadeIn, FadeInDown, FadeOut, SlideInDown, SlideOutDown, useAnimatedStyle, useReducedMotion, withSpring, withTiming,
 } from 'react-native-reanimated';
 import {
-  ArrowUpRight, ChevronRight, LifeBuoy, List, LocateFixed, Map as MapIcon, MapPin, Navigation, PawPrint, Share2, Stethoscope, X, type LucideIcon,
+  ArrowRight, ChevronRight, List, LocateFixed, Map as MapIcon, MapPin, Navigation, Share2, X, type LucideIcon,
 } from 'lucide-react-native';
 import { canTakeMeToAnimal, isProfessionalActive, isVisibleOnHome, primaryAction, statusTone } from '@animal/shared';
 import { MapCanvas } from '@/src/MapCanvas';
-import { AnimalFacesIcon } from '@/src/AnimalFacesIcon';
-import { FoodPacketIcon } from '@/src/FoodPacketIcon';
-import { casePhoto } from '@/src/photos';
+import { ReportBadgeIcon } from '@/src/ReportBadge';
+import { PROMO_PHOTOS, casePhoto } from '@/src/photos';
 import { AnimalPhoto, Button, PressableScale, StatusChip } from '@/src/ui';
 import { distanceLabel, timeAgo, useStore } from '@/src/store';
 import { problemText, shareCase } from '@/src/actions';
@@ -145,7 +144,7 @@ function Toggle({ value, onChange, count }: { value: View_; onChange: (v: View_)
 }
 
 function ReportCta({ onPress }: { onPress: () => void }) {
-  return <Button label="Report an animal in distress" icon={AnimalFacesIcon} variant="urgent" onPress={onPress} />;
+  return <Button label="Report an animal in distress" icon={ReportBadgeIcon} variant="urgent" onPress={onPress} />;
 }
 
 /**
@@ -158,63 +157,78 @@ function SecondaryBento({ compact }: { compact?: boolean }) {
   const open = foodRequests.filter((r) => r.status === 'Open').length;
   const reduce = useReducedMotion();
 
-  const adopt = (
-    <BentoTile
-      icon={PawPrint}
-      tone="peach"
-      title="Adopt a pet"
-      meta={`${available} waiting for a home`}
-      onPress={() => router.push('/adoption')}
-      deco={compact ? undefined : PawPrint}
-    />
-  );
-  const vets = (
-    <BentoTile icon={Stethoscope} tone="periwinkle" title="Vets and organisations" meta={`${ORGANISATIONS.length} near you`} onPress={() => router.push('/directory')} />
-  );
-  const help = (
-    <BentoTile icon={LifeBuoy} tone="lemon" title="Help and safety" meta="Stay safe while helping" onPress={() => router.push('/help')} />
-  );
-  const food = (
-    <BentoTile
-      icon={FoodPacketIcon}
-      tone="sage"
-      title="Food donations"
-      meta={`${open} open request${open === 1 ? '' : 's'}`}
-      onPress={() => router.push('/donations')}
-    />
-  );
-
   return (
-    <Animated.View entering={reduce ? undefined : FadeInDown.delay(120).duration(320)} style={{ gap: space[2] }}>
+    <Animated.View entering={reduce ? undefined : FadeInDown.delay(120).duration(320)} style={{ gap: space[3] }}>
       {!compact ? <Text style={[type.section, { marginTop: space[3] }]}>More ways to help</Text> : null}
       <View style={styles.bentoRow}>
-        <View style={styles.bentoCol}>{adopt}</View>
-        <View style={styles.bentoCol}>{food}</View>
+        <View style={styles.bentoCol}>
+          <BentoTile
+            tone="peach" title="Adopt a pet" sub="Give a rescued pet a home" pill={`${available} waiting`}
+            product={PROMO_PHOTOS.kitten} onPress={() => router.push('/adoption')}
+          />
+        </View>
+        <View style={styles.bentoCol}>
+          <BentoTile
+            tone="sage" title="Food donations" sub="Feed rescued animals" pill={`${open} open request${open === 1 ? '' : 's'}`}
+            product={PROMO_PHOTOS.petFood} wide onPress={() => router.push('/donations')}
+          />
+        </View>
       </View>
       <View style={styles.bentoRow}>
-        <View style={styles.bentoCol}>{vets}</View>
-        <View style={styles.bentoCol}>{help}</View>
+        <View style={styles.bentoCol}>
+          <BentoTile
+            tone="periwinkle" title="Vets and organisations" sub="Hospitals and rescue groups" pill={`${ORGANISATIONS.length} near you`}
+            product={PROMO_PHOTOS.vets} imageStyle={styles.cornerVets} onPress={() => router.push('/directory')}
+          />
+        </View>
+        <View style={styles.bentoCol}>
+          <BentoTile
+            tone="lemon" title="Help and safety" sub="Stay safe while helping" pill="First-aid tips"
+            product={PROMO_PHOTOS.safety} imageStyle={styles.cornerSafety} onPress={() => router.push('/help')}
+          />
+        </View>
       </View>
     </Animated.View>
   );
 }
 
+/**
+ * Promo-style tile (after the Swiggy-style references): white card, bold title,
+ * subtitle, a tinted pill fading out, a solid arrow button bottom-left and a
+ * visual tucked into the bottom-right corner. Colour comes from the tile's pastel.
+ */
 function BentoTile({
-  icon: Icon, tone, title, meta, onPress, tall, small, deco: Deco,
-}: { icon: LucideIcon | ComponentType<{ size?: number; color?: string; strokeWidth?: number }>; tone: keyof typeof pastel; title: string; meta?: string; onPress: () => void; tall?: boolean; small?: boolean; deco?: LucideIcon }) {
+  tone, title, sub, pill, onPress, photo, product, wide, imageStyle, icon: Icon,
+}: {
+  tone: keyof typeof pastel; title: string; sub: string; pill: string; onPress: () => void;
+  photo?: ImageSourcePropType; product?: ImageSourcePropType; wide?: boolean; imageStyle?: ImageStyle; icon?: LucideIcon;
+}) {
   const p = pastel[tone];
   return (
-    <PressableScale onPress={onPress} accessibilityLabel={title} style={[styles.tile, { backgroundColor: p.bg, borderColor: p.soft }, tall && styles.tileTall, small && styles.tileSmall]} scaleTo={0.97}>
-      {'grad' in p ? <GradientFill colors={p.grad} id={`tile-${tone}`} /> : null}
-      {Deco ? <View style={styles.tileDeco} pointerEvents="none"><Deco size={96} color={p.soft} strokeWidth={1.4} /></View> : null}
-      <View style={[styles.tileIcon, small && { width: 32, height: 32, borderRadius: 16 }]}>
-        <Icon size={small ? 16 : 20} color={p.ink} strokeWidth={2.1} />
+    <PressableScale onPress={onPress} accessibilityLabel={`${title}. ${sub}. ${pill}`} style={styles.tile} scaleTo={0.97}>
+      {/* corner visual first so text sits above it */}
+      {photo ? (
+        <View pointerEvents="none" style={[styles.cornerPhoto, { borderColor: p.bg }]}>
+          <Image source={photo} resizeMode="cover" style={styles.cornerPhotoImg} />
+        </View>
+      ) : product ? (
+        // Product shots have white backgrounds, so they sit straight on the white card like a cut-out.
+        <Image source={product} resizeMode="contain" style={[styles.cornerProduct, wide && styles.cornerProductWide, imageStyle]} />
+      ) : Icon ? (
+        <View pointerEvents="none" style={[styles.cornerDisc, { backgroundColor: p.bg }]}>
+          <View style={styles.cornerIcon}><Icon size={46} color={p.ink} strokeWidth={1.6} /></View>
+        </View>
+      ) : null}
+
+      <Text style={styles.tileTitle} numberOfLines={2}>{title}</Text>
+      <Text style={styles.tileSub} numberOfLines={2}>{sub}</Text>
+      <View style={styles.tilePill}>
+        <GradientFill colors={[p.soft, '#ffffff']} id={`pill-${tone}`} horizontal />
+        <Text style={[styles.tilePillText, { color: p.ink }]} numberOfLines={1}>{pill}</Text>
       </View>
-      <View style={{ flex: tall || small ? 1 : undefined, minWidth: 0, justifyContent: tall ? 'flex-end' : 'center', gap: 2 }}>
-        <Text style={[styles.tileTitle, small && { fontSize: 13.5 }]} numberOfLines={2}>{title}</Text>
-        {meta ? <Text style={[type.caption, { color: p.ink }]} numberOfLines={1}>{meta}</Text> : null}
+      <View style={[styles.tileGo, { backgroundColor: p.ink }]}>
+        <ArrowRight size={18} color="#ffffff" strokeWidth={2.6} />
       </View>
-      {!small ? <ArrowUpRight size={18} color={p.ink} style={styles.tileArrow} /> : null}
     </PressableScale>
   );
 }
@@ -348,13 +362,20 @@ const styles = StyleSheet.create({
   secRow: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', columnGap: 4, rowGap: 0 },
   bentoRow: { flexDirection: 'row', gap: space[2] },
   bentoCol: { flex: 1, minWidth: 0 },
-  tile: { flex: 1, borderRadius: radius.md, borderWidth: 1, padding: space[3], gap: space[2], overflow: 'hidden', minHeight: 132, boxShadow: '0 6px 18px rgba(110, 130, 170, 0.10)' },
-  tileTall: { flex: 1, minHeight: 176, padding: space[4] },
-  tileSmall: { minHeight: 56, flexDirection: 'row', alignItems: 'center', paddingVertical: space[2] },
-  tileIcon: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', backgroundColor: '#ffffff' },
-  tileTitle: { fontFamily: font.headingBold, fontSize: 15, lineHeight: 20, color: color.ink },
-  tileArrow: { position: 'absolute', top: space[3], right: space[3] },
-  tileDeco: { position: 'absolute', right: -18, bottom: -18, opacity: 0.9 },
+  tile: { flex: 1, minHeight: 196, padding: space[4], paddingBottom: 64, borderRadius: 22, backgroundColor: color.surface, overflow: 'hidden', gap: 4, boxShadow: '0 10px 28px rgba(110, 130, 170, 0.16)' },
+  tileTitle: { fontFamily: font.headingExtrabold, fontSize: 17, lineHeight: 21, color: color.ink, letterSpacing: -0.2 },
+  tileSub: { fontFamily: font.semibold, fontSize: 12, lineHeight: 16, color: color.inkMuted },
+  tilePill: { alignSelf: 'flex-start', marginTop: 6, paddingHorizontal: 10, paddingVertical: 4, borderRadius: radius.pill, overflow: 'hidden' },
+  tilePillText: { fontFamily: font.bold, fontSize: 11.5 },
+  tileGo: { position: 'absolute', left: space[4], bottom: space[4], width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center' },
+  cornerPhoto: { position: 'absolute', right: -14, bottom: -14, width: 96, height: 96, borderRadius: 48, borderWidth: 5, overflow: 'hidden' },
+  cornerPhotoImg: { width: '100%', height: '100%' },
+  cornerDisc: { position: 'absolute', right: -22, bottom: -22, width: 112, height: 112, borderRadius: 56, alignItems: 'center', justifyContent: 'center' },
+  cornerProduct: { position: 'absolute', right: -4, bottom: -6, width: 92, height: 112 },
+  cornerProductWide: { right: -14, bottom: -2, width: 132, height: 100 },
+  cornerVets: { right: -10, bottom: -6, width: 124, height: 104 },
+  cornerSafety: { right: -6, bottom: -4, width: 112, height: 104 },
+  cornerIcon: { marginRight: 14, marginBottom: 14 },
   secLink: { paddingHorizontal: 8, paddingVertical: 8, minHeight: 36, justifyContent: 'center' },
   secText: { fontFamily: font.semibold, fontSize: 13, color: color.inkSecondary, textDecorationLine: 'underline', textDecorationColor: color.line },
   sheet: { position: 'absolute', left: space[3], right: space[3], bottom: 92, backgroundColor: color.surface, borderRadius: radius.lg, padding: space[5], paddingTop: space[3], gap: space[3], ...shadow.sheet },
@@ -369,7 +390,7 @@ const styles = StyleSheet.create({
   rowActions: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 8, paddingLeft: 76 + space[3] },
   miniPrimary: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: color.action, borderRadius: radius.pill, paddingHorizontal: 14, height: 38 },
   miniPrimaryText: { fontFamily: font.bold, fontSize: 13, color: '#fff' },
-  viewLink: { flexDirection: 'row', alignItems: 'center', gap: 2, height: 38 },
+  viewLink: { flexDirection: 'row', alignItems: 'center', gap: 4, height: 38, paddingLeft: 16, paddingRight: 12, borderRadius: radius.pill, backgroundColor: '#ffffff', borderWidth: 1, borderColor: '#bcdcf2' },
   viewLinkText: { fontFamily: font.bold, fontSize: 13, color: color.action },
   shareBtn: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center', backgroundColor: color.fill },
   emptyOverlay: { position: 'absolute', left: space[5], right: space[5], top: '58%', backgroundColor: color.surface, borderRadius: radius.md, padding: space[4], gap: 4, ...shadow.card },

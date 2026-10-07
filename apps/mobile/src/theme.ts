@@ -62,13 +62,13 @@ export const shadow = {
 } as const;
 
 export const font = {
-  regular: 'NunitoSans_400Regular',
-  semibold: 'NunitoSans_600SemiBold',
-  bold: 'NunitoSans_700Bold',
-  extrabold: 'NunitoSans_800ExtraBold',
-  /** Headings use Nunito, the rounded sibling of Nunito Sans. */
-  headingBold: 'Nunito_700Bold',
-  headingExtrabold: 'Nunito_800ExtraBold',
+  /** One family across the app: Plus Jakarta Sans (modern, warm, readable). */
+  regular: 'PlusJakartaSans_400Regular',
+  semibold: 'PlusJakartaSans_600SemiBold',
+  bold: 'PlusJakartaSans_700Bold',
+  extrabold: 'PlusJakartaSans_800ExtraBold',
+  headingBold: 'PlusJakartaSans_700Bold',
+  headingExtrabold: 'PlusJakartaSans_800ExtraBold',
 } as const;
 
 export const type = {
