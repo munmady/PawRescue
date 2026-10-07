@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Animated, { FadeInDown, useAnimatedStyle, useSharedValue, withTiming, Easing, LinearTransition } from 'react-native-reanimated';
+import Animated, { FadeInDown, useAnimatedStyle, useSharedValue, withTiming, Easing } from 'react-native-reanimated';
 import { BadgeCheck, Ellipsis, MapPin, MessageCircle, Navigation, Pause, Phone, Play, Share2, type LucideIcon } from 'lucide-react-native';
 import { canReporterCancel, canTakeMeToAnimal, isProfessionalActive, statusLabel, statusTone } from '@animal/shared';
 import { casePhoto } from '@/src/photos';
@@ -131,7 +131,7 @@ export default function CaseDetail() {
             {[...c.events].reverse().map((e, i, arr) => {
               const latest = i === 0;
               return (
-                <Animated.View key={`${e.at}-${e.label}`} entering={FadeInDown.duration(260)} layout={LinearTransition.springify().damping(20)} style={styles.tlRow}>
+                <View key={`${e.at}-${i}`} style={styles.tlRow}>
                   <View style={styles.tlRail}>
                     <View style={[styles.tlDot, latest && { backgroundColor: tone.marker, borderColor: tone.bg }]} />
                     {i < arr.length - 1 ? <View style={styles.tlLine} /> : null}
@@ -140,7 +140,7 @@ export default function CaseDetail() {
                     <Text style={[type.label, { color: color.ink }, latest && { fontFamily: font.bold }]}>{e.label}</Text>
                     <Text style={type.caption}>{timeAgo(e.at)}</Text>
                   </View>
-                </Animated.View>
+                </View>
               );
             })}
           </View>

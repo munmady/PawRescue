@@ -1,10 +1,9 @@
-import { useEffect, useId, useRef, useState, type ComponentType, type ReactNode } from 'react';
-import { Image, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View, type StyleProp, type ViewStyle, type TextStyle, type AccessibilityRole, type AccessibilityState, type ImageSourcePropType, type LayoutChangeEvent } from 'react-native';
+import { useEffect, useId, type ComponentType, type ReactNode } from 'react';
+import { Image, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View, type StyleProp, type ViewStyle, type TextStyle, type AccessibilityRole, type AccessibilityState, type ImageSourcePropType } from 'react-native';
 import Animated, {
   FadeIn, FadeInDown, FadeOut, FadeOutDown, SlideInDown, SlideOutDown, useAnimatedStyle, useReducedMotion,
-  useSharedValue, withSequence, withSpring, withTiming, withRepeat, Easing, runOnJS,
+  useSharedValue, withSequence, withTiming, withRepeat, Easing,
 } from 'react-native-reanimated';
-import { GestureDetector, GestureHandlerRootView, usePanGesture } from 'react-native-gesture-handler';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -187,64 +186,18 @@ export function Card({ children, style, delay = 0 }: { children: ReactNode; styl
  * Bottom sheet rendered in a Modal so it always sits above the floating tab bar.
  * Tall content scrolls; on wide web windows it keeps the app's 440 px column.
  */
-/**
- * Bottom sheet: springs up over a fading scrim, slides back down when closed,
- * and can be swiped down to dismiss. Respects the system "Reduce motion" setting.
- */
 export function SheetDialog({ visible, onClose, children }: { visible: boolean; onClose: () => void; children: ReactNode }) {
   const insets = useSafeAreaInsets();
-  const reduce = useReducedMotion();
-  const [mounted, setMounted] = useState(visible);
-  const y = useSharedValue(900);
-  const h = useSharedValue(600);
-  const shown = useRef(false);
-
-  useEffect(() => {
-    if (visible) setMounted(true);
-    else if (mounted) {
-      shown.current = false;
-      y.value = withTiming(h.value + 40, { duration: reduce ? 120 : 220, easing: Easing.in(Easing.cubic) }, (done) => {
-        if (done) runOnJS(setMounted)(false);
-      });
-    }
-  }, [visible, mounted, reduce, y, h]);
-
-  const onLayout = (e: LayoutChangeEvent) => {
-    h.value = e.nativeEvent.layout.height;
-    if (visible && !shown.current) {
-      shown.current = true;
-      y.value = h.value + 40;
-      y.value = reduce ? withTiming(0, { duration: 160 }) : withSpring(0, { damping: 24, stiffness: 260, mass: 0.9 });
-    }
-  };
-
-  const pan = usePanGesture({
-    activeOffsetY: 8,
-    failOffsetX: [-20, 20],
-    onUpdate: (e) => {
-      'worklet';
-      y.value = e.translationY > 0 ? e.translationY : e.translationY * 0.15;
-    },
-    onDeactivate: (e) => {
-      'worklet';
-      if (e.translationY > Math.min(120, h.value * 0.3) || e.velocityY > 900) runOnJS(onClose)();
-      else y.value = withSpring(0, { damping: 22, stiffness: 300 });
-    },
-  });
-
-  const sheetStyle = useAnimatedStyle(() => ({ transform: [{ translateY: y.value }] }));
-  const scrimStyle = useAnimatedStyle(() => ({ opacity: Math.max(0, 1 - y.value / Math.max(h.value, 1)) }));
-
   return (
-    <Modal visible={mounted} transparent animationType="none" onRequestClose={onClose} statusBarTranslucent>
-      <GestureHandlerRootView style={styles.modalRoot}>
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.modalFrame}>
-          <Animated.View style={[StyleSheet.absoluteFill, { backgroundColor: color.scrim }, scrimStyle]}>
-            <Pressable style={{ flex: 1 }} onPress={onClose} accessibilityLabel="Close" />
-          </Animated.View>
-          <GestureDetector gesture={pan}>
-            <Animated.View onLayout={onLayout} style={[styles.dialog, sheetStyle]}>
-              <View style={styles.grabZone}><View style={styles.grab} /></View>
+    <Modal visible={visible} transparent animationType="none" onRequestClose={onClose} statusBarTranslucent>
+      <View style={styles.modalRoot}>
+        {visible ? (
+          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.modalFrame}>
+            <Animated.View entering={FadeIn.duration(180)} style={[StyleSheet.absoluteFill, { backgroundColor: color.scrim }]}>
+              <Pressable style={{ flex: 1 }} onPress={onClose} accessibilityLabel="Close" />
+            </Animated.View>
+            <Animated.View entering={SlideInDown.springify().damping(20)} style={styles.dialog}>
+              <View style={styles.grab} />
               <ScrollView
                 style={{ flexGrow: 0 }}
                 contentContainerStyle={[styles.dialogBody, { paddingBottom: Math.max(insets.bottom, space[6]) }]}
@@ -254,9 +207,9 @@ export function SheetDialog({ visible, onClose, children }: { visible: boolean; 
                 {children}
               </ScrollView>
             </Animated.View>
-          </GestureDetector>
-        </KeyboardAvoidingView>
-      </GestureHandlerRootView>
+          </KeyboardAvoidingView>
+        ) : null}
+      </View>
     </Modal>
   );
 }
@@ -335,7 +288,6 @@ export const styles = StyleSheet.create({
   iconBtn: { width: 44, height: 44, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center' },
   card: { backgroundColor: color.surface, borderRadius: radius.md, padding: space[4], ...shadow.card },
   modalRoot: { flex: 1, alignItems: 'center' },
-  grabZone: { alignItems: 'center', paddingBottom: space[1] },
   modalFrame: { flex: 1, width: '100%', maxWidth: 440, justifyContent: 'flex-end' },
   dialog: { maxHeight: '88%', backgroundColor: color.surface, borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg, paddingTop: space[3], ...shadow.sheet },
   dialogBody: { paddingHorizontal: space[5], paddingTop: space[2], gap: space[3] },

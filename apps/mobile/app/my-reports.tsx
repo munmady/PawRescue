@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Animated, { FadeInDown, FadeOut, LinearTransition } from 'react-native-reanimated';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { ChevronRight } from 'lucide-react-native';
 import { casePhoto } from '@/src/photos';
 import { AnimalPhoto, Pill, PressableScale, ScreenHeader, StatusChip } from '@/src/ui';
@@ -29,7 +29,7 @@ export default function MyReports() {
         {list.length === 0 ? (
           <Text style={[type.label, { textAlign: 'center', marginTop: space[8] }]}>No reports yet. Cases you report or take to care will appear here.</Text>
         ) : list.map((c, i) => (
-          <Animated.View key={c.id} entering={FadeInDown.delay(i * 50)} exiting={FadeOut.duration(150)} layout={LinearTransition.springify().damping(20)}>
+          <Animated.View key={c.id} entering={FadeInDown.delay(i * 50)}>
             <PressableScale onPress={() => router.push(`/case/${c.id}`)} accessibilityLabel={`Open ${c.title}`} style={styles.row}>
               <AnimalPhoto species={c.species} photo={casePhoto(c)} sensitive={c.sensitive} style={{ width: 56, height: 56 }} iconSize={24} />
               <View style={{ flex: 1, gap: 4 }}>

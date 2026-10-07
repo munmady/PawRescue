@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { FlatList, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Animated, { FadeIn, FadeInDown, FadeInUp, LinearTransition } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { Lock, RotateCw, SendHorizontal } from 'lucide-react-native';
 import { AnimalPhoto, Button, PressableScale, ScreenHeader } from '@/src/ui';
 import { timeAgo, useStore } from '@/src/store';
@@ -64,8 +64,7 @@ export default function AdoptionChat() {
         </View>
       ) : (
         <>
-          <Animated.FlatList
-        itemLayoutAnimation={LinearTransition.duration(220)}
+          <FlatList
             ref={list}
             data={messages}
             keyExtractor={(m) => m.id}

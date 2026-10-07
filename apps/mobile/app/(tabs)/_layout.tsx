@@ -137,7 +137,7 @@ function ReportButton() {
 
 export default function TabLayout() {
   return (
-    <Tabs tabBar={(p) => <TabBar {...p} />} screenOptions={{ headerShown: false, sceneStyle: { backgroundColor: color.page }, animation: 'fade', transitionSpec: { animation: 'timing', config: { duration: 160 } } }}>
+    <Tabs tabBar={(p) => <TabBar {...p} />} screenOptions={{ headerShown: false, sceneStyle: { backgroundColor: color.page } }}>
       <Tabs.Screen name="index" options={{ title: 'Home' }} />
       <Tabs.Screen name="adoption" options={{ title: 'Adopt' }} />
       <Tabs.Screen name="donations" options={{ title: 'Donate' }} />
