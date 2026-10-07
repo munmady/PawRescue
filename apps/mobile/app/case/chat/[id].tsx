@@ -7,6 +7,7 @@ import { BadgeCheck, Flag, RotateCw, SendHorizontal } from 'lucide-react-native'
 import { Button, Pill, PressableScale, ScreenHeader, SheetDialog } from '@/src/ui';
 import { timeAgo, useCase, useStore } from '@/src/store';
 import type { ChatMessage } from '@/src/data';
+import { TypingIndicator } from '@/src/TypingIndicator';
 import { color, font, radius, shadow, space, type } from '@/src/theme';
 
 const REASONS = ['Abusive or unprofessional language', 'False or misleading information'] as const;
@@ -16,7 +17,7 @@ export default function CaseChat() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const c = useCase(id);
   const insets = useSafeAreaInsets();
-  const { chats, account, requireAccount, postMessage, retryMessage, flagMessage } = useStore();
+  const { chats, account, requireAccount, postMessage, retryMessage, flagMessage, typing } = useStore();
   const [text, setText] = useState('');
   const [blocked, setBlocked] = useState(false);
   const [flagging, setFlagging] = useState<ChatMessage | null>(null);
@@ -26,7 +27,7 @@ export default function CaseChat() {
 
   const messages = chats.filter((m) => m.caseId === id && !m.official);
   const official = chats.filter((m) => m.caseId === id && m.official);
-  useEffect(() => { setTimeout(() => list.current?.scrollToEnd({ animated: true }), 50); }, [messages.length]);
+  useEffect(() => { setTimeout(() => list.current?.scrollToEnd({ animated: true }), 50); }, [messages.length, typing[id!]]);
 
   const send = () => {
     const t = text.trim();
@@ -55,6 +56,7 @@ export default function CaseChat() {
         data={messages}
         keyExtractor={(m) => m.id}
         contentContainerStyle={{ padding: space[5], gap: space[3], flexGrow: 1 }}
+        ListFooterComponent={<TypingIndicator name={typing[id!]} />}
         ListEmptyComponent={<Text style={[type.label, { textAlign: 'center', marginTop: space[8] }]}>Share anything that helps the rescue team find this animal.</Text>}
         renderItem={({ item: m }) => (
           <Animated.View entering={FadeInUp.duration(250)} style={[styles.msgWrap, m.mine && { alignItems: 'flex-end' }]}>

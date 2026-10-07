@@ -37,8 +37,8 @@ export default function CaseDetail() {
   const transporter = transportedIds.includes(c.id);
   const official = [...chats].reverse().find((m) => m.caseId === c.id && m.official);
   const messageCount = chats.filter((m) => m.caseId === c.id && !m.official).length;
-  // Photo sits inset in the hero card with the same 16 px padding every card uses.
-  const photoW = Math.min(width, 440) - space[5] * 2 - 2 - space[4] * 2;
+  // Photo spans the full width of the hero card (card width minus its 1 px borders).
+  const photoW = Math.min(width, 440) - space[5] * 2 - 2;
   const tone = toneColors[statusTone(c)];
   const takeMe = () => requireAccount('Sign in to help this animal', () => router.push(`/respond/${c.id}`));
 
@@ -232,7 +232,7 @@ function VoiceNote({ seconds }: { seconds: number }) {
 
 const styles = StyleSheet.create({
   iconBtn: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
-  gallery: { margin: space[4], marginBottom: 0, borderRadius: radius.md, overflow: 'hidden', backgroundColor: color.surfaceTint },
+  gallery: { overflow: 'hidden', backgroundColor: color.surfaceTint },
   dots: { position: 'absolute', bottom: 12, left: 0, right: 0, flexDirection: 'row', justifyContent: 'center', gap: 6 },
   dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: 'rgba(255,255,255,0.65)' },
   dotOn: { width: 18, backgroundColor: '#ffffff' },

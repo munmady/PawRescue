@@ -8,6 +8,7 @@ import { AnimalPhoto, Button, PressableScale, ScreenHeader } from '@/src/ui';
 import { timeAgo, useStore } from '@/src/store';
 import { adoptionPhoto } from '@/src/photos';
 import type { AdoptionMessage } from '@/src/data';
+import { TypingIndicator } from '@/src/TypingIndicator';
 import { color, font, radius, shadow, space, type } from '@/src/theme';
 
 /**
@@ -18,14 +19,14 @@ import { color, font, radius, shadow, space, type } from '@/src/theme';
 export default function AdoptionChat() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const insets = useSafeAreaInsets();
-  const { account, adoptions, adoptionChats, requireAccount, sendAdoptionMessage, retryAdoptionMessage } = useStore();
+  const { account, adoptions, adoptionChats, requireAccount, sendAdoptionMessage, retryAdoptionMessage, typing } = useStore();
   const [text, setText] = useState('');
   const [blocked, setBlocked] = useState(false);
   const list = useRef<FlatList<AdoptionMessage>>(null);
 
   const a = adoptions.find((x) => x.id === id);
   const messages = adoptionChats.filter((m) => m.listingId === id);
-  useEffect(() => { setTimeout(() => list.current?.scrollToEnd({ animated: true }), 50); }, [messages.length]);
+  useEffect(() => { setTimeout(() => list.current?.scrollToEnd({ animated: true }), 50); }, [messages.length, typing[id!]]);
 
   if (!a) return null;
   const name = a.name ?? (a.species === 'dog' ? 'Dog' : a.species === 'cat' ? 'Cat' : 'Animal');
@@ -74,6 +75,7 @@ export default function AdoptionChat() {
                 <Text style={[type.caption, { flex: 1 }]}>Only you and {a.poster} see this chat. Phone numbers aren&apos;t shared. Share contact details only if you want to.</Text>
               </View>
             }
+            ListFooterComponent={<TypingIndicator name={typing[id!]} />}
             ListEmptyComponent={
               <Animated.View entering={FadeInDown.delay(120)} style={styles.empty}>
                 <Text style={[type.label, { textAlign: 'center' }]}>Say hello and ask about {name}.</Text>

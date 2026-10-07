@@ -6,6 +6,7 @@ import {
   ADOPTIONS, FOOD_REQUESTS, SEED_CASES, SEED_CHATS, SEED_USER_ID,
   type AdoptionListing, type AdoptionMessage, type Case, type ChatMessage, type Donation, type FoodRequest,
 } from './data';
+import { adoptionReply, caseReplies, typingDelay } from './chatReplies';
 
 export interface Account {
   name: string;
@@ -57,6 +58,8 @@ interface Store {
   /** Returns false when the pre-send filter blocks the message (text stays in the composer). */
   sendAdoptionMessage: (listingId: string, text: string) => boolean;
   retryAdoptionMessage: (id: string) => void;
+  /** Who is typing in a case chat or adoption chat (keyed by case id / listing id). SIMULATED DEMO. */
+  typing: Record<string, string | undefined>;
 }
 
 const Ctx = createContext<Store | null>(null);
@@ -73,7 +76,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [foodRequests] = useState<FoodRequest[]>(FOOD_REQUESTS);
   const [donations, setDonations] = useState<Donation[]>([]);
   const [adoptionChats, setAdoptionChats] = useState<AdoptionMessage[]>([]);
-  const repliedTo = useRef(new Set<string>());
+  const [typing, setTyping] = useState<Record<string, string | undefined>>({});
+  const turns = useRef<Record<string, number>>({});
   const [toast, setToast] = useState<Store['toast']>(null);
   const pending = useRef<(() => void) | null>(null);
   // Starts high so runtime ids (a…, m…, d…) never collide with seed ids like a1 or m1.
@@ -128,7 +132,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo<Store>(() => ({
-    account, cases, chats, reportedIds, transportedIds, adoptions, foodRequests, donations, toast, adoptionChats,
+    account, cases, chats, reportedIds, transportedIds, adoptions, foodRequests, donations, toast, adoptionChats, typing,
     showToast, requireAccount, completeAccount,
     signOut: () => { setAccount(null); showToast('Signed out'); },
     submitReport,
@@ -151,6 +155,23 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       }
       const failed = /\bfail\b/i.test(text);
       setChats((m) => [...m, { id: `m${seq.current++}`, caseId, firstName: account?.name.split(' ')[0] ?? 'You', role: reportedIds.includes(caseId) ? 'Reporter' : transportedIds.includes(caseId) ? 'Community Responder' : null, text, at: Date.now(), mine: true, failed }]);
+      // SIMULATED DEMO: people following the case reply, one after another, with a typing indicator.
+      const kase = cases.find((x) => x.id === caseId);
+      if (kase && !failed) {
+        const turn = turns.current[caseId] ?? 0;
+        turns.current[caseId] = turn + 1;
+        let t = 700;
+        for (const r of caseReplies(kase, text, turn)) {
+          const startAt = t;
+          const endAt = t + typingDelay(r.text);
+          setTimeout(() => setTyping((x) => ({ ...x, [caseId]: r.firstName })), startAt);
+          setTimeout(() => {
+            setTyping((x) => ({ ...x, [caseId]: undefined }));
+            setChats((m) => [...m, { id: `m${seq.current++}`, caseId, at: Date.now(), ...r }]);
+          }, endAt);
+          t = endAt + 900;
+        }
+      }
       return true;
     },
     flagMessage: () => showToast('Thanks for flagging this. Our team will review it.'),
@@ -167,20 +188,22 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (ABUSE.some((r) => r.test(text))) return false;
       const failed = /fail/i.test(text);
       setAdoptionChats((m) => [...m, { id: `am${seq.current++}`, listingId, from: account?.name.split(' ')[0] ?? 'You', mine: true, text, at: Date.now(), failed }]);
-      // SIMULATED DEMO: the poster answers the first message of a conversation.
+      // SIMULATED DEMO: the poster replies to each message, with a typing indicator.
       const listing = adoptions.find((x) => x.id === listingId);
-      if (listing && !failed && !repliedTo.current.has(listingId)) {
-        repliedTo.current.add(listingId);
-        const name = listing.name ?? 'this little one';
-        setTimeout(() => setAdoptionChats((m) => [...m, {
-          id: `am${seq.current++}`, listingId, from: listing.poster, mine: false, at: Date.now(),
-          text: `Hi! Yes, ${name} is still looking for a home. Happy to answer any questions or set up a visit.`,
-        }]), 3500);
+      if (listing && !listing.mine && !failed) {
+        const turn = turns.current[listingId] ?? 0;
+        turns.current[listingId] = turn + 1;
+        const reply = adoptionReply(listing, text, turn);
+        setTimeout(() => setTyping((x) => ({ ...x, [listingId]: listing.poster })), 800);
+        setTimeout(() => {
+          setTyping((x) => ({ ...x, [listingId]: undefined }));
+          setAdoptionChats((m) => [...m, { id: `am${seq.current++}`, listingId, from: listing.poster, mine: false, at: Date.now(), text: reply }]);
+        }, 800 + typingDelay(reply));
       }
       return true;
     },
     retryAdoptionMessage: (mid) => setAdoptionChats((m) => m.map((x) => (x.id === mid ? { ...x, failed: false } : x))),
-  }), [account, cases, chats, reportedIds, transportedIds, adoptions, foodRequests, donations, toast, adoptionChats, showToast, requireAccount, completeAccount, submitReport, patchCase]);
+  }), [account, cases, chats, reportedIds, transportedIds, adoptions, foodRequests, donations, toast, adoptionChats, typing, showToast, requireAccount, completeAccount, submitReport, patchCase]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
