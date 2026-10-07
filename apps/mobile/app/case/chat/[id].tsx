@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { FlatList, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Animated, { FadeIn, FadeInDown, FadeInUp } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeInDown, FadeInUp, LinearTransition } from 'react-native-reanimated';
 import { BadgeCheck, Flag, RotateCw, SendHorizontal } from 'lucide-react-native';
 import { Button, Pill, PressableScale, ScreenHeader, SheetDialog } from '@/src/ui';
 import { timeAgo, useCase, useStore } from '@/src/store';
@@ -51,7 +51,8 @@ export default function CaseChat() {
           <Text style={type.caption}>{timeAgo(m.at)}</Text>
         </Animated.View>
       ))}
-      <FlatList
+      <Animated.FlatList
+        itemLayoutAnimation={LinearTransition.duration(220)}
         ref={list}
         data={messages}
         keyExtractor={(m) => m.id}

@@ -403,8 +403,7 @@ function ReviewListing({
 function EditChip({ onPress, label, dark }: { onPress: () => void; label: string; dark?: boolean }) {
   return (
     <PressableScale onPress={onPress} accessibilityLabel={label} hitSlop={8} scaleTo={0.92} style={[styles.editChip, dark && styles.editChipDark]}>
-      <Pencil size={13} color={dark ? '#ffffff' : color.action} />
-      <Text style={[styles.editText, dark && { color: '#ffffff' }]}>Edit</Text>
+      <Pencil size={15} color={dark ? '#ffffff' : color.action} strokeWidth={2.2} />
     </PressableScale>
   );
 }
@@ -504,10 +503,9 @@ const styles = StyleSheet.create({
   voicePlay: { width: 32, height: 32, borderRadius: 16, backgroundColor: color.action, alignItems: 'center', justifyContent: 'center' },
   voiceTrack: { flex: 1, height: 4, borderRadius: 2, backgroundColor: color.primary, opacity: 0.5 },
   privateCard: { backgroundColor: color.surface, borderRadius: radius.md, padding: space[4], gap: space[2], borderWidth: 1, borderColor: color.line },
-  editChip: { flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 32, paddingHorizontal: 12, borderRadius: radius.pill, backgroundColor: color.surfaceTint },
+  editChip: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', backgroundColor: color.surfaceTint },
   photoEdit: { position: 'absolute', top: 12, right: 12 },
   editChipDark: { backgroundColor: 'rgba(31,41,55,0.62)' },
-  editText: { fontFamily: font.bold, fontSize: 13, color: color.action },
   footerPin: { position: 'absolute', left: 0, right: 0, bottom: 0 },
   sentCard: { alignItems: 'center', gap: space[3], backgroundColor: color.surface, borderRadius: 20, padding: space[5], borderWidth: 1, borderColor: color.line, ...shadow.card },
   dupCase: { flexDirection: 'row', alignItems: 'center', gap: space[3], backgroundColor: color.fill, borderRadius: radius.md, padding: space[3] },

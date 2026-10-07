@@ -1,6 +1,9 @@
 import { useEffect } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
-import { DefaultTheme, Stack, ThemeProvider } from 'expo-router';
+import { DefaultTheme, ThemeProvider } from 'expo-router';
+import { Stack } from 'expo-router/js-stack';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { useReducedMotion } from 'react-native-reanimated';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import {
@@ -24,6 +27,7 @@ const theme = {
 };
 
 export default function RootLayout() {
+  const reduce = useReducedMotion();
   const [loaded, error] = useFonts({ PlusJakartaSans_400Regular, PlusJakartaSans_600SemiBold, PlusJakartaSans_700Bold, PlusJakartaSans_800ExtraBold });
 
   useEffect(() => {
@@ -36,21 +40,25 @@ export default function RootLayout() {
   if (!loaded) return null;
 
   return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
     <ThemeProvider value={theme}>
       <StoreProvider>
         <StatusBar style="dark" />
         <View style={styles.outer}>
           <View style={styles.app}>
-            <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: color.page }, animation: 'slide_from_right' }}>
+            {/* JavaScript stack: the same transitions on phones and on the web build.
+                Pages slide in from the right (swipe back on phones); tasks (Report, Sign in) rise from the bottom. */}
+            <Stack screenOptions={{ headerShown: false, cardStyle: { backgroundColor: color.page }, animation: reduce ? 'fade' : 'slide_from_right', gestureEnabled: true }}>
               <Stack.Screen name="(tabs)" />
-              <Stack.Screen name="auth" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
-              <Stack.Screen name="report" options={{ animation: 'slide_from_bottom' }} />
+              <Stack.Screen name="auth" options={{ animation: reduce ? 'fade' : 'slide_from_bottom', gestureDirection: 'vertical' }} />
+              <Stack.Screen name="report" options={{ animation: reduce ? 'fade' : 'slide_from_bottom', gestureEnabled: false }} />
             </Stack>
             <ToastHost />
           </View>
         </View>
       </StoreProvider>
     </ThemeProvider>
+    </GestureHandlerRootView>
   );
 }
 
