@@ -6,7 +6,7 @@ import Animated, {
   FadeIn, FadeInDown, FadeOut, SlideInDown, SlideOutDown, useAnimatedStyle, useReducedMotion, withSpring, withTiming,
 } from 'react-native-reanimated';
 import {
-  ArrowRight, ChevronRight, List, LocateFixed, Map as MapIcon, MapPin, Navigation, Share2, X, type LucideIcon,
+  ArrowRight, List, LocateFixed, Map as MapIcon, MapPin, Navigation, Share2, X, type LucideIcon,
 } from 'lucide-react-native';
 import { canTakeMeToAnimal, isProfessionalActive, isVisibleOnHome, primaryAction, statusTone } from '@animal/shared';
 import { MapCanvas } from '@/src/MapCanvas';
@@ -95,7 +95,7 @@ export default function Home() {
         <ScrollView contentContainerStyle={{ paddingBottom: 130, paddingHorizontal: space[5], gap: space[3] }} showsVerticalScrollIndicator={false}>
           <ReportCta onPress={report} />
           {visible.length === 0 ? <EmptyList /> : visible.map((c, i) => (
-            <CaseRow key={c.id} c={c} i={i} onPress={() => open(c)} onTakeMe={() => takeMe(c)} onShare={() => shareCase(c, showToast)} />
+            <CaseRow key={c.id} c={c} i={i} onPress={() => open(c)} onShare={() => shareCase(c, showToast)} />
           ))}
           <SecondaryBento />
         </ScrollView>
@@ -284,7 +284,7 @@ function SheetNote({ c }: { c: Case }) {
   return <Text style={[type.label, { color: color.inkSecondary }]}>{text}</Text>;
 }
 
-function CaseRow({ c, i, onPress, onTakeMe, onShare }: { c: Case; i: number; onPress: () => void; onTakeMe: () => void; onShare: () => void }) {
+function CaseRow({ c, i, onPress, onShare }: { c: Case; i: number; onPress: () => void; onShare: () => void }) {
   const reduce = useReducedMotion();
   const urgent = statusTone(c) === 'urgent';
   return (
@@ -297,25 +297,15 @@ function CaseRow({ c, i, onPress, onTakeMe, onShare }: { c: Case; i: number; onP
             <Text style={styles.dist}>{distanceLabel(c.distanceM)}</Text>
           </View>
           <Text style={type.caption} numberOfLines={1}>{c.area} · {problemText(c)}</Text>
-          <View style={{ marginTop: 4 }}><StatusChip c={c} size="sm" /></View>
+          <View style={{ marginTop: 4, marginRight: 40 }}><StatusChip c={c} size="sm" /></View>
         </View>
       </PressableScale>
-          <View style={styles.rowActions}>
-            {primaryAction(c) === 'take_me' ? (
-              <PressableScale onPress={onTakeMe} accessibilityLabel="Take me to the animal" style={styles.miniPrimary}>
-                <Navigation size={14} color="#fff" />
-                <Text style={styles.miniPrimaryText}>Take me to the animal</Text>
-              </PressableScale>
-            ) : (
-              <PressableScale onPress={onPress} accessibilityLabel="View case" style={styles.viewLink} scaleTo={0.95}>
-                <Text style={styles.viewLinkText}>View case</Text>
-                <ChevronRight size={15} color={color.action} />
-              </PressableScale>
-            )}
-            <PressableScale onPress={onShare} accessibilityLabel="Share" style={styles.shareBtn} scaleTo={0.9}>
-              <Share2 size={16} color={color.inkSecondary} />
-            </PressableScale>
-          </View>
+      {/* Opening the card leads to Case Detail, where Take me to the animal lives. */}
+      <View style={styles.shareWrap}>
+        <PressableScale onPress={onShare} accessibilityLabel="Share" style={styles.shareBtn} scaleTo={0.9}>
+          <Share2 size={16} color={color.inkSecondary} />
+        </PressableScale>
+      </View>
     </Animated.View>
   );
 }
@@ -387,11 +377,7 @@ const styles = StyleSheet.create({
   rowMain: { flexDirection: 'row', gap: space[3] },
   rowUrgent: { borderWidth: 1, borderColor: color.urgentTint },
   dist: { fontFamily: font.extrabold, fontSize: 14, color: color.ink },
-  rowActions: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 8, paddingLeft: 76 + space[3] },
-  miniPrimary: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: color.action, borderRadius: radius.pill, paddingHorizontal: 14, height: 38 },
-  miniPrimaryText: { fontFamily: font.bold, fontSize: 13, color: '#fff' },
-  viewLink: { flexDirection: 'row', alignItems: 'center', gap: 4, height: 38, paddingLeft: 16, paddingRight: 12, borderRadius: radius.pill, backgroundColor: '#ffffff', borderWidth: 1, borderColor: '#bcdcf2' },
-  viewLinkText: { fontFamily: font.bold, fontSize: 13, color: color.action },
-  shareBtn: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center', backgroundColor: color.fill },
+  shareWrap: { position: 'absolute', right: space[3], bottom: space[3] },
+  shareBtn: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', backgroundColor: color.fill },
   emptyOverlay: { position: 'absolute', left: space[5], right: space[5], top: '58%', backgroundColor: color.surface, borderRadius: radius.md, padding: space[4], gap: 4, ...shadow.card },
 });

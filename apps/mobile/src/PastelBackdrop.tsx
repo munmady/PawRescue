@@ -25,12 +25,12 @@ export function PastelBackdrop({ height = 300 }: { variant?: 'home' | 'adoption'
 }
 
 /** Diagonal two-stop pastel gradient filling its (rounded, overflow-hidden) parent. */
-export function GradientFill({ colors, id, horizontal }: { colors: readonly [string, string] | readonly string[]; id: string; horizontal?: boolean }) {
+export function GradientFill({ colors, id, horizontal, vertical }: { colors: readonly [string, string] | readonly string[]; id: string; horizontal?: boolean; vertical?: boolean }) {
   return (
     <View pointerEvents="none" style={StyleSheet.absoluteFill}>
       <Svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
         <Defs>
-          <LinearGradient id={id} x1="0" y1="0" x2="1" y2={horizontal ? 0 : 1}>
+          <LinearGradient id={id} x1="0" y1="0" x2={vertical ? 0 : 1} y2={horizontal ? 0 : 1}>
             <Stop offset="0" stopColor={colors[0]} />
             <Stop offset="1" stopColor={colors[1]} />
           </LinearGradient>

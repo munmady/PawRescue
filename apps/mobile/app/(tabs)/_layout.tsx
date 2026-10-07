@@ -14,6 +14,7 @@ import { color, font } from '@/src/theme';
 import { useStore } from '@/src/store';
 import { ReportBadge } from '@/src/ReportBadge';
 import { BlurView } from 'expo-blur';
+import { GradientFill } from '@/src/PastelBackdrop';
 import { PressableScale } from '@/src/ui';
 
 /**
@@ -38,7 +39,13 @@ function TabBar({ state, navigation }: BottomTabBarProps) {
             Clipped in its own layer so the raised Report circle isn't cut off. */}
         <View pointerEvents="none" style={styles.barBg}>
           <GlassBlur />
-          <View style={styles.barTint} />
+          {/* Rich navy-to-indigo glass, slightly see-through, with a soft sheen on top. */}
+          <View style={styles.barTint}>
+            <GradientFill colors={['#121c46', '#33459c']} id="tabbar-glass" horizontal />
+          </View>
+          <View style={styles.barSheen}>
+            <GradientFill colors={['rgba(255,255,255,0.22)', 'rgba(255,255,255,0)']} id="tabbar-sheen" vertical />
+          </View>
         </View>
         {state.routes.map((route, i) => {
           const item = ITEMS[route.name];
@@ -142,9 +149,10 @@ const styles = StyleSheet.create({
   wrap: { position: 'absolute', left: 0, right: 0, bottom: 0, paddingHorizontal: 14, paddingTop: 8 },
   bar: {
     flexDirection: 'row', padding: PAD, borderRadius: 30,
-    boxShadow: '0 14px 34px rgba(10,24,60,0.35), 0 2px 6px rgba(10,24,60,0.18)',
+    boxShadow: '0 16px 36px rgba(32,44,120,0.38), 0 3px 8px rgba(18,28,70,0.22)',
   },
-  barTint: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(18,38,86,0.52)' },
+  barTint: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, opacity: 0.88 },
+  barSheen: { position: 'absolute', top: 0, left: 0, right: 0, height: '55%' },
   barBg: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, borderRadius: 30, overflow: 'hidden' },
   tab: { flex: 1, height: 56, alignItems: 'center', justifyContent: 'center', gap: 3 },
   label: { fontFamily: font.semibold, fontSize: 11.5, letterSpacing: 0.1 },
