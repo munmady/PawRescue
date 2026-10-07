@@ -3,10 +3,13 @@ import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput
 import { useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown, FadeInRight, useAnimatedStyle, useSharedValue, withSequence, withTiming } from 'react-native-reanimated';
-import { Check, Mail, ShieldCheck } from 'lucide-react-native';
+import { Check, Mail, MailCheck, ShieldCheck, Smartphone, UserRound, type LucideIcon } from 'lucide-react-native';
 import { Button, FadeSlide, ScreenHeader } from '@/src/ui';
 import { DEMO_MOBILE, useStore } from '@/src/store';
 import { color, font, radius, space, type } from '@/src/theme';
+import { Divider, GroupLabel, PrivacyNote, StepCard, StepTracker, stepStyles } from '@/src/StepFlow';
+
+const STAGES = ['Your details', 'Verify email'] as const;
 
 const DEMO_CODE = '246810';
 // Demo mode: the form arrives filled in. Fictional values; Indian mobiles start 6–9, so this number can't be real.
@@ -54,55 +57,62 @@ export default function Auth() {
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1, backgroundColor: color.page, paddingTop: insets.top }}>
-      <ScreenHeader title="" onBack={step === 'code' ? () => setStep('details') : undefined} />
-      <ScrollView contentContainerStyle={{ padding: space[6], paddingTop: space[2], gap: space[5] }} keyboardShouldPersistTaps="handled">
-        <FadeSlide k={step}>
+      <ScreenHeader title={reason || 'Set up your account'} onBack={step === 'code' ? () => setStep('details') : undefined} />
+      <StepTracker stages={STAGES} stage={step === 'details' ? 0 : 1} />
+      <FadeSlide k={step}>
+        <ScrollView contentContainerStyle={{ paddingHorizontal: space[5], paddingTop: space[3], gap: space[3], paddingBottom: space[6] }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
           {step === 'details' ? (
-            <View style={{ gap: space[5] }}>
-              <View style={{ gap: space[2] }}>
-                <Text style={type.display}>{reason || 'Set up your account'}</Text>
-                <Text style={type.body}>It takes a minute, once: your name, email and mobile, then a code we send to your email.</Text>
-              </View>
-              <Animated.View entering={FadeInDown.delay(120)} style={styles.demoCode}>
-                <ShieldCheck size={16} color={color.amberInk} />
-                <Text style={[type.label, { color: color.amberInk, flex: 1 }]}>Demo · filled in with sample details. Edit them or tap Send code.</Text>
-              </Animated.View>
-              <Field label="Name" value={name} onChangeText={setName} placeholder="Priya" error={errors.name} autoComplete="name" />
-              <Field label="Email" value={email} onChangeText={setEmail} placeholder="you@example.com" error={errors.email} keyboardType="email-address" autoComplete="email" />
-              <Field label="Mobile number" value={mobile} onChangeText={setMobile} placeholder="98XXX XXXXX" error={errors.mobile} keyboardType="phone-pad" prefix="+91" autoComplete="tel"
+            <StepCard icon={UserRound} title="Your details">
+              <Text style={stepStyles.lead}>It takes a minute, once: your name, email and mobile, then a code we send to your email.</Text>
+              <DemoNote text="Demo · filled in with sample details. Edit them or tap Send code." />
+              <Divider />
+              <Field label="Name" icon={UserRound} value={name} onChangeText={setName} placeholder="Priya" error={errors.name} autoComplete="name" />
+              <Field label="Email" icon={Mail} value={email} onChangeText={setEmail} placeholder="you@example.com" error={errors.email} keyboardType="email-address" autoComplete="email" />
+              <Field label="Mobile number" icon={Smartphone} value={mobile} onChangeText={setMobile} placeholder="98XXX XXXXX" error={errors.mobile} keyboardType="phone-pad" prefix="+91" autoComplete="tel"
                 hint="Rescue teams use it to reach you. It can't be changed later." />
-              <Button label="Send code" icon={Mail} onPress={sendCode} />
-            </View>
+              <Divider />
+              <PrivacyNote text="Your email and mobile are never shown publicly." />
+            </StepCard>
           ) : (
-            <View style={{ gap: space[5] }}>
-              <View style={{ gap: space[2] }}>
-                <Text style={type.display}>Check your email</Text>
-                <Text style={type.body}>Enter the 6-digit code we sent to {email}.</Text>
-              </View>
-              <Animated.View entering={FadeInDown.delay(120)} style={styles.demoCode}>
-                <ShieldCheck size={16} color={color.amberInk} />
-                <Text style={[type.label, { color: color.amberInk, flex: 1 }]}>Demo · your code is {DEMO_CODE}, already filled in</Text>
-              </Animated.View>
+            <StepCard icon={MailCheck} title="Check your email">
+              <Text style={stepStyles.lead}>Enter the 6-digit code we sent to <Text style={{ fontFamily: font.bold }}>{email}</Text>.</Text>
+              <DemoNote text={`Demo · your code is ${DEMO_CODE}, already filled in`} />
+              <Divider />
+              <GroupLabel>6-digit code</GroupLabel>
               <Animated.View style={shakeStyle}>
                 <Pressable6 value={code} onChange={(v) => { setCode(v); setErrors({}); }} inputRef={codeRef} />
               </Animated.View>
               {errors.code ? <Text style={styles.error}>{errors.code}</Text> : null}
-              <Button label="Verify" icon={Check} onPress={verify} disabled={code.length < 6} />
-              <Button label="Resend code" variant="link" onPress={() => { setCode(''); setErrors({}); }} />
-            </View>
+              <Button label="Resend code" variant="link" full={false} style={{ alignSelf: 'flex-start' }} onPress={() => { setCode(''); setErrors({}); }} />
+            </StepCard>
           )}
-        </FadeSlide>
-      </ScrollView>
+        </ScrollView>
+      </FadeSlide>
+      <View style={[stepStyles.footer, { paddingBottom: Math.max(insets.bottom, space[4]) }]}>
+        {step === 'details'
+          ? <Button label="Send code" icon={Mail} onPress={sendCode} />
+          : <Button label="Verify" icon={Check} onPress={verify} disabled={code.length < 6} />}
+      </View>
     </KeyboardAvoidingView>
   );
 }
 
-function Field({ label, error, hint, prefix, ...p }: React.ComponentProps<typeof TextInput> & { label: string; error?: string; hint?: string; prefix?: string }) {
+function DemoNote({ text }: { text: string }) {
+  return (
+    <Animated.View entering={FadeInDown.delay(120)} style={styles.demoCode}>
+      <ShieldCheck size={16} color={color.amberInk} />
+      <Text style={[type.label, { color: color.amberInk, flex: 1 }]}>{text}</Text>
+    </Animated.View>
+  );
+}
+
+function Field({ label, icon: Icon, error, hint, prefix, ...p }: React.ComponentProps<typeof TextInput> & { label: string; icon: LucideIcon; error?: string; hint?: string; prefix?: string }) {
   const [focus, setFocus] = useState(false);
   return (
     <View style={{ gap: 6 }}>
-      <Text style={[type.label, { color: color.ink }]}>{label}</Text>
+      <GroupLabel>{label}</GroupLabel>
       <View style={[styles.input, focus && styles.inputFocus, error && styles.inputError]}>
+        <Icon size={18} color={focus ? color.action : color.inkMuted} />
         {prefix ? <Text style={[type.body, { color: color.ink }]}>{prefix}</Text> : null}
         <TextInput
           {...p}
@@ -147,14 +157,14 @@ function Pressable6({ value, onChange, inputRef }: { value: string; onChange: (v
 }
 
 const styles = StyleSheet.create({
-  input: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: color.surface, borderRadius: radius.md, borderWidth: 1.5, borderColor: color.line, paddingHorizontal: space[4], minHeight: 52 },
-  inputFocus: { borderColor: color.action },
+  input: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: color.fill, borderRadius: radius.md, borderWidth: 1.5, borderColor: 'transparent', paddingHorizontal: space[4], minHeight: 52 },
+  inputFocus: { borderColor: color.action, backgroundColor: color.surface },
   inputError: { borderColor: color.urgent },
   inputText: { flex: 1, fontFamily: font.regular, fontSize: 16, color: color.ink, paddingVertical: 12, outlineStyle: 'none' } as never,
   error: { fontFamily: font.semibold, fontSize: 13, color: color.urgent },
   demoCode: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: color.amberTint, borderRadius: radius.md, padding: space[3] },
   codeRow: { flexDirection: 'row', justifyContent: 'space-between', gap: 8 },
-  codeBox: { flex: 1, height: 58, borderRadius: radius.md, backgroundColor: color.surface, borderWidth: 1.5, borderColor: color.line, alignItems: 'center', justifyContent: 'center' },
+  codeBox: { flex: 1, height: 54, borderRadius: radius.md, backgroundColor: color.fill, borderWidth: 1.5, borderColor: color.line, alignItems: 'center', justifyContent: 'center' },
   codeBoxActive: { borderColor: color.action },
   codeBoxFilled: { backgroundColor: color.surfaceTint, borderColor: color.primary },
   codeChar: { fontFamily: font.extrabold, fontSize: 22, color: color.ink },

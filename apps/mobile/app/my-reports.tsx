@@ -13,14 +13,15 @@ import { color, radius, shadow, space, type } from '@/src/theme';
 export default function MyReports() {
   const insets = useSafeAreaInsets();
   const { cases, reportedIds, transportedIds } = useStore();
-  const [tab, setTab] = useState<'active' | 'closed'>('active');
+  const [tab, setTab] = useState<'all' | 'active' | 'closed'>('all');
   const mine = cases.filter((c) => reportedIds.includes(c.id) || transportedIds.includes(c.id));
   const closed = (s: string) => s === 'CLOSED' || s === 'CANCELLED';
-  const list = mine.filter((c) => (tab === 'closed' ? closed(c.status) : !closed(c.status)));
+  const list = tab === 'all' ? mine : mine.filter((c) => (tab === 'closed' ? closed(c.status) : !closed(c.status)));
   return (
     <View style={{ flex: 1, backgroundColor: color.page, paddingTop: insets.top }}>
       <ScreenHeader title="My reports" />
       <View style={styles.tabs}>
+        <Pill label="All" selected={tab === 'all'} onPress={() => setTab('all')} />
         <Pill label="Active" selected={tab === 'active'} onPress={() => setTab('active')} />
         <Pill label="Closed" selected={tab === 'closed'} onPress={() => setTab('closed')} />
       </View>
