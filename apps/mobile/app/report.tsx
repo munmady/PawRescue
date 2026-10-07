@@ -6,11 +6,13 @@ import Animated, {
   FadeIn, FadeInDown, ZoomIn, useAnimatedStyle, useSharedValue, withRepeat, withTiming, withSpring,
 } from 'react-native-reanimated';
 import {
-  Camera, Check, CircleCheck, ImagePlus, LocateFixed, Lock, MapPin, Mic, Pencil, Square, Trash2, RotateCcw, X, Play, ShieldAlert,
+  Bell, Camera, Check, ChevronLeft, ChevronRight, CircleCheck, HeartHandshake, ImagePlus, LocateFixed, Lock, MapPin, Mic, Pencil, Square, Trash2, RotateCcw, X, Play,
+  ShieldAlert, ShieldCheck, Stethoscope,
 } from 'lucide-react-native';
 import { PROBLEMS, type ProblemCode, type Species } from '@animal/shared';
 import { AnimalPhoto, Button, FadeSlide, Pill, PressableScale, SheetDialog, StatusChip } from '@/src/ui';
 import { MapCanvas } from '@/src/MapCanvas';
+import { Bullet, Divider, GroupLabel, StepCard, StepTracker, stepStyles } from '@/src/StepFlow';
 import { PHOTOS, type PhotoKey } from '@/src/photos';
 
 // SIMULATED DEMO: the camera and gallery hand back these sample photos in turn.
@@ -19,7 +21,7 @@ import { mobileLabel, useStore } from '@/src/store';
 import { color, font, radius, shadow, space, type } from '@/src/theme';
 
 type Step = 0 | 1 | 2 | 3 | 4;
-const STEP_TITLES = ['Add evidence', "What's wrong?", 'Where is it?', 'Review and send'];
+const STEP_TITLES = ['Add evidence', "What's wrong?", 'Where is it?', 'Review and send'] as const;
 
 export default function Report() {
   const insets = useSafeAreaInsets();
@@ -66,106 +68,110 @@ export default function Report() {
   return (
     <View style={[styles.screen, { paddingTop: insets.top }]}>
       {step < 4 ? (
-        <View style={styles.top}>
-          <PressableScale onPress={back} accessibilityLabel={step === 0 ? 'Close' : 'Back'} style={styles.iconBtn} scaleTo={0.9}>
-            {step === 0 ? <X size={22} color={color.ink} /> : <Text style={styles.backText}>Back</Text>}
-          </PressableScale>
-          <View style={{ flex: 1, gap: 6 }}>
-            <Text style={[type.caption, { textAlign: 'center' }]}>Step {step + 1} of 4</Text>
-            <Progress value={(step + 1) / 4} />
+        <>
+          <View style={styles.top}>
+            <PressableScale onPress={back} accessibilityLabel={step === 0 ? 'Close' : 'Back'} style={styles.iconBtn} scaleTo={0.9}>
+              {step === 0 ? <X size={22} color={color.ink} /> : <ChevronLeft size={24} color={color.ink} />}
+            </PressableScale>
+            <Text style={styles.topTitle}>Report an animal</Text>
+            <View style={{ width: 44 }} />
           </View>
-          <View style={{ width: 44 }} />
-        </View>
+          <StepTracker stages={STEP_TITLES} stage={step} />
+        </>
       ) : null}
 
       <FadeSlide k={step}>
-        <ScrollView contentContainerStyle={{ padding: space[5], gap: space[5], paddingBottom: 140 }} keyboardShouldPersistTaps="handled">
-          {step < 4 ? <Text style={type.display}>{STEP_TITLES[step]}</Text> : null}
-
+        <ScrollView contentContainerStyle={{ paddingHorizontal: space[5], paddingTop: space[3], gap: space[3], paddingBottom: 140 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
           {step === 0 ? (
-            <View style={{ gap: space[4] }}>
-              <Text style={type.body}>Add 1 to 4 photos or videos. Stay safe and keep your distance.</Text>
-              <View style={styles.tray}>
-                {media.map((m) => (
-                  <Animated.View key={m.id} entering={ZoomIn.springify().damping(14)} style={styles.thumb}>
-                    <AnimalPhoto species="dog" photo={PHOTOS[m.photo]} style={StyleSheet.absoluteFill} iconSize={28} />
-                    {m.kind === 'video' ? <View style={styles.videoTag}><Play size={10} color="#fff" /><Text style={styles.videoText}>0:12</Text></View> : null}
-                    <PressableScale onPress={() => setMedia((x) => x.filter((y) => y.id !== m.id))} accessibilityLabel="Remove" style={styles.remove} scaleTo={0.85}>
-                      <X size={14} color={color.ink} />
-                    </PressableScale>
-                  </Animated.View>
-                ))}
-                {media.length < 4 ? (
-                  <View style={styles.addCol}>
-                    <PressableScale onPress={() => { setNoMedia(false); setMedia((x) => [...x, { id: Date.now(), kind: 'photo', photo: DEMO_CAPTURES[x.length % DEMO_CAPTURES.length] }]); }} accessibilityLabel="Take a photo" style={styles.addTile}>
-                      <Camera size={22} color={color.action} />
-                      <Text style={styles.addText}>Camera</Text>
-                    </PressableScale>
-                    <PressableScale onPress={() => { setNoMedia(false); setMedia((x) => [...x, { id: Date.now(), kind: x.length % 2 ? 'video' : 'photo', photo: DEMO_CAPTURES[x.length % DEMO_CAPTURES.length] }]); }} accessibilityLabel="Choose from gallery" style={styles.addTile}>
-                      <ImagePlus size={22} color={color.action} />
-                      <Text style={styles.addText}>Gallery</Text>
-                    </PressableScale>
-                  </View>
-                ) : null}
+            <StepCard icon={Camera} title="Add photos or videos">
+              <Text style={stepStyles.lead}>Add 1 to 4 photos or videos. Stay safe and keep your distance.</Text>
+              <View style={styles.addRow}>
+                <PressableScale onPress={() => { setNoMedia(false); setMedia((x) => [...x, { id: Date.now(), kind: 'photo', photo: DEMO_CAPTURES[x.length % DEMO_CAPTURES.length] }]); }} accessibilityLabel="Take a photo" disabled={media.length >= 4} style={[styles.addTile, media.length >= 4 && { opacity: 0.4 }]}>
+                  <Camera size={22} color={color.action} />
+                  <Text style={styles.addText}>Camera</Text>
+                </PressableScale>
+                <PressableScale onPress={() => { setNoMedia(false); setMedia((x) => [...x, { id: Date.now(), kind: x.length % 2 ? 'video' : 'photo', photo: DEMO_CAPTURES[x.length % DEMO_CAPTURES.length] }]); }} accessibilityLabel="Choose from gallery" disabled={media.length >= 4} style={[styles.addTile, media.length >= 4 && { opacity: 0.4 }]}>
+                  <ImagePlus size={22} color={color.action} />
+                  <Text style={styles.addText}>Gallery</Text>
+                </PressableScale>
               </View>
+              {media.length ? (
+                <View style={styles.tray}>
+                  {media.map((m) => (
+                    <Animated.View key={m.id} entering={ZoomIn.springify().damping(14)} style={styles.thumb}>
+                      <AnimalPhoto species="dog" photo={PHOTOS[m.photo]} style={StyleSheet.absoluteFill} iconSize={28} />
+                      {m.kind === 'video' ? <View style={styles.videoTag}><Play size={10} color="#fff" /><Text style={styles.videoText}>0:12</Text></View> : null}
+                      <PressableScale onPress={() => setMedia((x) => x.filter((y) => y.id !== m.id))} accessibilityLabel="Remove" style={styles.remove} scaleTo={0.85}>
+                        <X size={14} color={color.ink} />
+                      </PressableScale>
+                    </Animated.View>
+                  ))}
+                </View>
+              ) : null}
               <Text style={type.caption}>{media.length} / 4{media.length === 4 ? ' · Maximum reached. Remove one to add another.' : ''}</Text>
+              <Divider />
               {noMedia ? (
                 <Animated.View entering={FadeIn} style={styles.note}>
                   <ShieldAlert size={18} color={color.amberInk} />
                   <Text style={[type.label, { color: color.amberInk, flex: 1 }]}>No media: you couldn&apos;t capture it safely. Details and an exact location will help the team most.</Text>
                 </Animated.View>
               ) : (
-                <Button label="I can't safely take a photo or video" variant="link" onPress={() => setSheet('safety')} />
+                <PressableScale onPress={() => setSheet('safety')} accessibilityLabel="I can't safely take a photo or video" style={styles.safeRow} scaleTo={0.98}>
+                  <ShieldAlert size={18} color={color.inkSecondary} />
+                  <Text style={[type.label, { flex: 1, color: color.ink }]}>I can&apos;t safely take a photo or video</Text>
+                  <ChevronRight size={18} color={color.inkMuted} />
+                </PressableScale>
               )}
-            </View>
+            </StepCard>
           ) : null}
 
           {step === 1 ? (
-            <View style={{ gap: space[5] }}>
-              <View style={{ gap: space[2] }}>
-                <Text style={type.section}>Which animal?</Text>
-                <View style={styles.wrap}>
-                  {(['dog', 'cat', 'other'] as Species[]).map((s) => (
-                    <Pill key={s} label={s === 'dog' ? 'Dog' : s === 'cat' ? 'Cat' : 'Other'} selected={species === s} onPress={() => setSpecies(s)} />
-                  ))}
-                </View>
+            <StepCard icon={Stethoscope} title="What's wrong?">
+              <GroupLabel>Which animal?</GroupLabel>
+              <View style={styles.wrap}>
+                {(['dog', 'cat', 'other'] as Species[]).map((s) => (
+                  <Pill key={s} label={s === 'dog' ? 'Dog' : s === 'cat' ? 'Cat' : 'Other'} selected={species === s} onPress={() => setSpecies(s)} />
+                ))}
               </View>
-              <View style={{ gap: space[2] }}>
-                <Text style={type.section}>What&apos;s wrong? Pick any that fit.</Text>
-                <View style={styles.wrap}>
-                  {PROBLEMS.map((p) => (
-                    <Pill key={p.code} label={p.label} selected={problems.includes(p.code)}
-                      onPress={() => setProblems((x) => (x.includes(p.code) ? x.filter((y) => y !== p.code) : [...x, p.code]))} />
-                  ))}
-                </View>
+              <Divider />
+              <GroupLabel>What&apos;s wrong? Pick any that fit.</GroupLabel>
+              <View style={styles.wrap}>
+                {PROBLEMS.map((p) => (
+                  <Pill key={p.code} label={p.label} selected={problems.includes(p.code)}
+                    onPress={() => setProblems((x) => (x.includes(p.code) ? x.filter((y) => y !== p.code) : [...x, p.code]))} />
+                ))}
               </View>
-              <View style={{ gap: space[2] }}>
-                <Text style={type.section}>Tell us what you saw <Text style={type.caption}>(optional)</Text></Text>
-                <Text style={type.label}>Add any details that may help the rescue team.</Text>
-                <Composer text={details} setText={setDetails} voice={voice} setVoice={setVoice} />
-                {noMedia ? <Text style={type.caption}>Without a photo or video, details here help the team most.</Text> : null}
-              </View>
-            </View>
+              <Divider />
+              <GroupLabel optional>Tell us what you saw</GroupLabel>
+              <Text style={type.label}>Add any details that may help the rescue team.</Text>
+              <Composer text={details} setText={setDetails} voice={voice} setVoice={setVoice} />
+              {noMedia ? <Text style={type.caption}>Without a photo or video, details here help the team most.</Text> : null}
+            </StepCard>
           ) : null}
 
           {step === 2 ? (
-            <View style={{ gap: space[4] }}>
+            <StepCard icon={MapPin} title="Where is it?">
+              <Text style={stepStyles.lead}>Tap the map to drop the pin where the animal is.</Text>
               <View style={styles.miniMap}>
                 <MapCanvas cases={[]} onSelect={() => {}} onBackgroundPress={() => setLocated(true)} />
                 <DropPin show={located} />
               </View>
-              <Button label={located ? 'Location set' : 'Use current location'} icon={located ? Check : LocateFixed} variant={located ? 'quiet' : 'outline'} onPress={() => setLocated(true)} />
               {located ? (
                 <Animated.View entering={FadeInDown} style={styles.addr}>
-                  <MapPin size={16} color={color.action} />
-                  <Text style={[type.label, { color: color.ink }]}>Near Hill Road, Andheri East</Text>
+                  <View style={styles.addrIcon}><MapPin size={16} color={color.action} /></View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[type.section, { fontSize: 14 }]}>Near Hill Road, Andheri East</Text>
+                    <Text style={type.caption}>Pin set</Text>
+                  </View>
+                  <Check size={18} color={color.successInk} />
                 </Animated.View>
-              ) : <Text style={type.caption}>Tap the map to drop the pin where the animal is.</Text>}
-              <View style={{ gap: 6 }}>
-                <Text style={[type.label, { color: color.ink }]}>Landmark (optional)</Text>
-                <TextInput value={landmark} onChangeText={(t) => setLandmark(t.slice(0, 100))} placeholder="Outside the chai stall" placeholderTextColor={color.inkSubtle} style={styles.field} accessibilityLabel="Landmark" />
-              </View>
-            </View>
+              ) : (
+                <Button label="Use current location" icon={LocateFixed} variant="outline" onPress={() => setLocated(true)} />
+              )}
+              <Divider />
+              <GroupLabel optional>Landmark</GroupLabel>
+              <TextInput value={landmark} onChangeText={(t) => setLandmark(t.slice(0, 100))} placeholder="Outside the chai stall" placeholderTextColor={color.inkSubtle} style={styles.field} accessibilityLabel="Landmark" />
+            </StepCard>
           ) : null}
 
           {step === 3 ? (
@@ -180,7 +186,7 @@ export default function Report() {
       </FadeSlide>
 
       {step < 4 ? (
-        <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, space[4]) }]}>
+        <View style={[stepStyles.footer, styles.footerPin, { paddingBottom: Math.max(insets.bottom, space[4]) }]}>
           {step < 3 ? (
             <Button
               label={reviewed ? 'Back to review' : 'Continue'}
@@ -406,52 +412,63 @@ function Sent({ id }: { id: string | null }) {
   const [stay, setStay] = useState<string | null>(null);
   const [transport, setTransport] = useState<string | null>(null);
   return (
-    <View style={{ gap: space[5], paddingTop: space[6] }}>
-      <Animated.View entering={ZoomIn.springify().damping(11)} style={styles.sentIcon}>
-        <CircleCheck size={44} color={color.successInk} strokeWidth={2} />
+    <View style={{ gap: space[3], paddingTop: space[4] }}>
+      <Animated.View entering={FadeInDown.duration(300)} style={styles.sentCard}>
+        <Animated.View entering={ZoomIn.springify().damping(11)} style={styles.sentIcon}>
+          <CircleCheck size={40} color={color.successInk} strokeWidth={2} />
+        </Animated.View>
+        <Text style={[type.display, { textAlign: 'center' }]}>Report sent.</Text>
+        <Text style={[type.body, { textAlign: 'center' }]}>We&apos;re alerting rescue teams near you. You&apos;ve done the most important part. Reporting is free and doesn&apos;t make you responsible for the animal.</Text>
       </Animated.View>
-      <Animated.View entering={FadeInDown.delay(150)} style={{ gap: space[2] }}>
-        <Text style={type.display}>Report sent.</Text>
-        <Text style={type.body}>We&apos;re alerting rescue teams near you. You&apos;ve done the most important part. Reporting is free and doesn&apos;t make you responsible for the animal.</Text>
+
+      <Animated.View entering={FadeInDown.delay(120)}>
+        <StepCard icon={Bell} title="What happens next">
+          <Text style={type.label}>We&apos;ll update you when a team accepts and as the animal gets care. (Demo notifications)</Text>
+        </StepCard>
       </Animated.View>
-      <Animated.View entering={FadeInDown.delay(250)} style={styles.next}>
-        <Text style={type.section}>What happens next</Text>
-        <Text style={type.label}>We&apos;ll update you when a team accepts and as the animal gets care. (Demo notifications)</Text>
+
+      <Animated.View entering={FadeInDown.delay(200)}>
+        <StepCard icon={ShieldCheck} tone="success" title="Stay safe">
+          {['Keep a safe distance and don’t stand in traffic.', 'Bitten or scratched? Wash with soap and running water for 15 minutes and see a doctor today.', 'Children: ask an adult.'].map((t) => (
+            <Bullet key={t} text={t} />
+          ))}
+        </StepCard>
       </Animated.View>
-      <Animated.View entering={FadeInDown.delay(330)} style={{ gap: space[2] }}>
-        <Text style={type.section}>Stay safe</Text>
-        {['Keep a safe distance and don’t stand in traffic.', 'Bitten or scratched? Wash with soap and running water for 15 minutes and see a doctor today.', 'Children: ask an adult.'].map((t) => (
-          <Text key={t} style={type.label}>• {t}</Text>
-        ))}
+
+      <Animated.View entering={FadeInDown.delay(280)}>
+        <StepCard icon={HeartHandshake} title="Optional ways you can help">
+          <Text style={type.label}>Only if you&apos;re able. It&apos;s okay to leave.</Text>
+          <Divider />
+          <GroupLabel>Can you stay nearby for a while?</GroupLabel>
+          <View style={styles.wrap}>{['Yes', 'About 15 min', 'Not able to'].map((o) => <Pill key={o} label={o} selected={stay === o} onPress={() => setStay(o)} />)}</View>
+          <Divider />
+          <GroupLabel>Could you help transport the animal, if the team asks?</GroupLabel>
+          <View style={styles.wrap}>{['Yes', 'Not able to'].map((o) => <Pill key={o} label={o} selected={transport === o} onPress={() => setTransport(o)} />)}</View>
+        </StepCard>
       </Animated.View>
-      <Animated.View entering={FadeInDown.delay(410)} style={{ gap: space[3] }}>
-        <Text style={type.section}>Optional ways you can help: only if you&apos;re able</Text>
-        <Text style={type.label}>Can you stay nearby for a while?</Text>
-        <View style={styles.wrap}>{['Yes', 'About 15 min', 'Not able to'].map((o) => <Pill key={o} label={o} selected={stay === o} onPress={() => setStay(o)} />)}</View>
-        <Text style={type.label}>Could you help transport the animal, if the team asks?</Text>
-        <View style={styles.wrap}>{['Yes', 'Not able to'].map((o) => <Pill key={o} label={o} selected={transport === o} onPress={() => setTransport(o)} />)}</View>
-        <Text style={type.caption}>These are optional. It&apos;s okay to leave.</Text>
-      </Animated.View>
-      <Button label="View your report" onPress={() => id && router.replace(`/case/${id}`)} />
-      <Button label="Back to Home" variant="link" onPress={() => router.back()} />
+
+      <View style={{ gap: space[2], marginTop: space[2] }}>
+        <Button label="View your report" onPress={() => id && router.replace(`/case/${id}`)} />
+        <Button label="Back to Home" variant="outline" onPress={() => router.back()} />
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: color.page },
-  top: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: space[3], paddingVertical: space[2], gap: space[2] },
+  top: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: space[3], paddingVertical: space[1], gap: space[2] },
+  topTitle: { flex: 1, textAlign: 'center', fontFamily: font.bold, fontSize: 16, color: color.ink },
   iconBtn: { minWidth: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
-  backText: { fontFamily: font.bold, fontSize: 14, color: color.action },
   progress: { height: 6, borderRadius: 3, backgroundColor: color.line, overflow: 'hidden' },
   progressFill: { height: 6, borderRadius: 3, backgroundColor: color.primary },
-  tray: { flexDirection: 'row', flexWrap: 'wrap', gap: space[3] },
-  thumb: { width: 100, height: 100, borderRadius: radius.md, overflow: 'hidden' },
-  remove: { position: 'absolute', top: 6, right: 6, width: 26, height: 26, borderRadius: 13, backgroundColor: 'rgba(255,255,255,0.92)', alignItems: 'center', justifyContent: 'center' },
+  tray: { flexDirection: 'row', flexWrap: 'wrap', gap: space[2] },
+  thumb: { width: 64, height: 64, borderRadius: radius.md, overflow: 'hidden' },
+  remove: { position: 'absolute', top: 4, right: 4, width: 22, height: 22, borderRadius: 11, backgroundColor: 'rgba(255,255,255,0.92)', alignItems: 'center', justifyContent: 'center' },
   videoTag: { position: 'absolute', left: 6, bottom: 6, flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: 'rgba(47,58,76,0.75)', borderRadius: radius.pill, paddingHorizontal: 6, paddingVertical: 2 },
   videoText: { fontFamily: font.bold, fontSize: 10, color: '#fff' },
-  addCol: { flexDirection: 'row', gap: space[3] },
-  addTile: { width: 100, height: 100, borderRadius: radius.md, borderWidth: 1.5, borderStyle: 'dashed', borderColor: color.primary, backgroundColor: color.surface, alignItems: 'center', justifyContent: 'center', gap: 6 },
+  addRow: { flexDirection: 'row', gap: space[2] },
+  addTile: { flex: 1, height: 88, borderRadius: radius.md, borderWidth: 1.5, borderStyle: 'dashed', borderColor: color.primary, backgroundColor: color.surface, alignItems: 'center', justifyContent: 'center', gap: 6 },
   addText: { fontFamily: font.bold, fontSize: 13, color: color.action },
   note: { flexDirection: 'row', gap: space[2], backgroundColor: color.amberTint, borderRadius: radius.md, padding: space[3], alignItems: 'flex-start' },
   wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: space[2] },
@@ -462,9 +479,11 @@ const styles = StyleSheet.create({
   smallBtn: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', backgroundColor: color.fill },
   voiceRow: { flexDirection: 'row', alignItems: 'center', gap: space[2], backgroundColor: color.surfaceTint, borderRadius: radius.pill, paddingLeft: space[3] },
   wave: { flex: 1, height: 4, borderRadius: 2, backgroundColor: color.primary },
-  miniMap: { height: 260 },
+  miniMap: { height: 220, borderRadius: radius.md, overflow: 'hidden' },
   pin: { position: 'absolute', left: '50%', top: '50%', marginLeft: -20, marginTop: -40 },
-  addr: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  addr: { flexDirection: 'row', alignItems: 'center', gap: space[3], backgroundColor: color.fill, borderRadius: radius.md, padding: space[3] },
+  addrIcon: { width: 36, height: 36, borderRadius: 18, backgroundColor: color.surface, alignItems: 'center', justifyContent: 'center' },
+  safeRow: { flexDirection: 'row', alignItems: 'center', gap: space[3], minHeight: 48 },
   field: { backgroundColor: color.surface, borderRadius: radius.md, borderWidth: 1, borderColor: color.line, paddingHorizontal: space[4], minHeight: 50, fontFamily: font.regular, fontSize: 15, color: color.ink },
   readonly: { backgroundColor: color.surfaceTint, borderRadius: radius.md, padding: space[4] },
   summary: { backgroundColor: color.surface, borderRadius: radius.md, padding: space[4], gap: 2, ...shadow.card },
@@ -488,8 +507,8 @@ const styles = StyleSheet.create({
   photoEdit: { position: 'absolute', top: 12, right: 12 },
   editChipDark: { backgroundColor: 'rgba(31,41,55,0.62)' },
   editText: { fontFamily: font.bold, fontSize: 13, color: color.action },
-  footer: { position: 'absolute', left: 0, right: 0, bottom: 0, paddingHorizontal: space[5], paddingTop: space[3], backgroundColor: color.page },
+  footerPin: { position: 'absolute', left: 0, right: 0, bottom: 0 },
+  sentCard: { alignItems: 'center', gap: space[3], backgroundColor: color.surface, borderRadius: 20, padding: space[5], borderWidth: 1, borderColor: color.line, ...shadow.card },
   dupCase: { flexDirection: 'row', alignItems: 'center', gap: space[3], backgroundColor: color.fill, borderRadius: radius.md, padding: space[3] },
   sentIcon: { width: 84, height: 84, borderRadius: 42, backgroundColor: color.successTint, alignItems: 'center', justifyContent: 'center' },
-  next: { backgroundColor: color.surfaceTint, borderRadius: radius.md, padding: space[4], gap: 4 },
 });
