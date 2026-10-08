@@ -3,6 +3,16 @@ import { PROBLEMS, statusLabel, type ProblemCode, type Species } from '@animal/s
 import type { Case } from './data';
 
 /** A descriptive case title from the animal and its main problem, e.g. "Trapped dog", "Cat unable to walk". */
+/** An adoption listing's display name; never just "Dog" or "Cat" when the poster gave no name. */
+export function listingName(a: { name?: string; species: Species }) {
+  return a.name ?? `Unnamed ${a.species === 'dog' ? 'dog' : a.species === 'cat' ? 'cat' : 'animal'}`;
+}
+
+/** How to refer to a listing in a sentence: its name, or "this dog" / "this cat". */
+export function listingRef(a: { name?: string; species: Species }) {
+  return a.name ?? `this ${a.species === 'dog' ? 'dog' : a.species === 'cat' ? 'cat' : 'animal'}`;
+}
+
 export function caseTitle(species: Species | null, problems: ProblemCode[]) {
   const a = species === 'dog' ? 'dog' : species === 'cat' ? 'cat' : 'animal';
   const A = a[0].toUpperCase() + a.slice(1);

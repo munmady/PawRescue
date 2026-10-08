@@ -39,7 +39,7 @@ export default function Respond() {
 
   if (!c) return null;
   const pro = isProfessionalActive(c);
-  const maps = () => showToast('Opens your maps app (demo)');
+  const maps = () => showToast('Opens your maps app', { tone: 'demo', sub: 'Demo: maps open on a real phone' });
   const stage = STAGE_OF[step];
   const done = step === 'nav2' && c.status === 'AT_HOSPITAL';
 

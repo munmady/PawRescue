@@ -6,6 +6,7 @@ import Animated, { FadeIn, FadeInDown, FadeInUp } from 'react-native-reanimated'
 import { Lock, RotateCw, SendHorizontal } from 'lucide-react-native';
 import { AnimalPhoto, Button, PressableScale, ScreenHeader } from '@/src/ui';
 import { timeAgo, useStore } from '@/src/store';
+import { listingName, listingRef } from '@/src/actions';
 import { adoptionPhoto } from '@/src/photos';
 import type { AdoptionMessage } from '@/src/data';
 import { TypingIndicator } from '@/src/TypingIndicator';
@@ -29,8 +30,9 @@ export default function AdoptionChat() {
   useEffect(() => { setTimeout(() => list.current?.scrollToEnd({ animated: true }), 50); }, [messages.length, typing[id!]]);
 
   if (!a) return null;
-  const name = a.name ?? (a.species === 'dog' ? 'Dog' : a.species === 'cat' ? 'Cat' : 'Animal');
-  const starters = [`Is ${a.name ?? 'this animal'} still available?`, 'Can I come and visit?', 'What does the adoption involve?'];
+  const name = listingName(a);
+  const ref = listingRef(a);
+  const starters = [`Is ${ref} still available?`, 'Can I come and visit?', 'What does the adoption involve?'];
 
   const send = (t = text.trim()) => {
     if (!t) return;
@@ -55,7 +57,7 @@ export default function AdoptionChat() {
 
       {!account ? (
         <View style={styles.signedOut}>
-          <Text style={[type.body, { textAlign: 'center' }]}>Sign in to chat with {a.poster} about {name}.</Text>
+          <Text style={[type.body, { textAlign: 'center' }]}>Sign in to chat with {a.poster} about {ref}.</Text>
           <Button label="Set up your account" onPress={() => requireAccount('Sign in to chat with the poster', () => {})} />
         </View>
       ) : a.mine ? (
@@ -78,7 +80,7 @@ export default function AdoptionChat() {
             ListFooterComponent={<TypingIndicator name={typing[id!]} />}
             ListEmptyComponent={
               <Animated.View entering={FadeInDown.delay(120)} style={styles.empty}>
-                <Text style={[type.label, { textAlign: 'center' }]}>Say hello and ask about {name}.</Text>
+                <Text style={[type.label, { textAlign: 'center' }]}>Say hello and ask about {ref}.</Text>
                 <View style={styles.starters}>
                   {starters.map((s) => (
                     <PressableScale key={s} onPress={() => send(s)} accessibilityLabel={`Send: ${s}`} style={styles.starter} scaleTo={0.96}>

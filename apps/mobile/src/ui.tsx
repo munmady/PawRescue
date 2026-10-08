@@ -7,7 +7,7 @@ import Animated, {
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
-  Ambulance, Cat, Check, ChevronLeft, CircleCheck, Clock, Dog, EyeOff, Images, MapPinCheck, PawPrint, Route, Siren, type LucideIcon,
+  Ambulance, Cat, Check, ChevronLeft, CircleCheck, Clock, Dog, EyeOff, FlaskConical, Images, Info, MapPinCheck, PawPrint, Route, Siren, type LucideIcon,
 } from 'lucide-react-native';
 import { statusLabel, statusTone, type CaseLike, type Species, type StatusTone } from '@animal/shared';
 import { color, font, pastel, radius, shadow, space, toneColors, type, type PastelName } from './theme';
@@ -224,6 +224,13 @@ export function SheetDialog({ visible, onClose, children }: { visible: boolean; 
 }
 
 /* ---------- Toast ---------- */
+const TOAST_TONES = {
+  success: { Icon: CircleCheck, bg: '#e3f6ec', fg: '#1b7449' },
+  info: { Icon: Info, bg: '#e6f1fb', fg: '#0c447c' },
+  demo: { Icon: FlaskConical, bg: '#fdf0d5', fg: '#8a5a00' },
+} as const;
+
+/** Popup message: a white card with a soft shadow, a coloured icon for its type and an optional second line. */
 export function ToastHost() {
   const { toast } = useStore();
   const show = useSharedValue(0);
@@ -233,9 +240,14 @@ export function ToastHost() {
   }, [toast, show]);
   const a = useAnimatedStyle(() => ({ opacity: show.value, transform: [{ translateY: (1 - show.value) * 16 }] }));
   if (!toast) return null;
+  const t = TOAST_TONES[toast.tone];
   return (
     <Animated.View pointerEvents="none" style={[styles.toast, a]} accessibilityLiveRegion="polite">
-      <Text style={[type.label, { color: '#fff' }]}>{toast.text}</Text>
+      <View style={[styles.toastIcon, { backgroundColor: t.bg }]}><t.Icon size={18} color={t.fg} strokeWidth={2.2} /></View>
+      <View style={{ flex: 1, gap: 1 }}>
+        <Text style={styles.toastTitle}>{toast.text}</Text>
+        {toast.sub ? <Text style={type.caption}>{toast.sub}</Text> : null}
+      </View>
     </Animated.View>
   );
 }
@@ -303,7 +315,9 @@ export const styles = StyleSheet.create({
   dialog: { maxHeight: '88%', backgroundColor: color.surface, borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg, paddingTop: space[3], ...shadow.sheet },
   dialogBody: { paddingHorizontal: space[5], paddingTop: space[2], gap: space[3] },
   grab: { width: 40, height: 4, borderRadius: 2, backgroundColor: color.line, alignSelf: 'center', marginBottom: space[2] },
-  toast: { position: 'absolute', left: space[5], right: space[5], bottom: 108, backgroundColor: color.ink, borderRadius: radius.md, paddingVertical: space[3], paddingHorizontal: space[4], alignItems: 'center' },
+  toast: { position: 'absolute', left: space[5], right: space[5], bottom: 128, flexDirection: 'row', alignItems: 'center', gap: space[3], backgroundColor: '#ffffff', borderRadius: 16, borderWidth: 1, borderColor: color.line, paddingVertical: space[3], paddingHorizontal: space[3], boxShadow: '0 10px 28px rgba(31,41,55,0.16), 0 2px 6px rgba(31,41,55,0.06)' },
+  toastIcon: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center' },
+  toastTitle: { fontFamily: font.bold, fontSize: 14, lineHeight: 19, color: color.ink },
   pill: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, minHeight: 40, borderRadius: radius.pill, backgroundColor: color.surface, borderWidth: 1, borderColor: color.line },
   pillOn: { backgroundColor: color.surfaceTint, borderColor: color.primary },
 });

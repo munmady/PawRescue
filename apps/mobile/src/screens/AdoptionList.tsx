@@ -3,10 +3,11 @@ import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { Camera, ImagePlus, MapPin, Play, Plus, X } from 'lucide-react-native';
+import { Camera, Check, ChevronDown, ImagePlus, MapPin, Play, Plus, X } from 'lucide-react-native';
 import type { Species } from '@animal/shared';
 import { AnimalPhoto, Button, Pill, PressableScale, ScreenHeader, SheetDialog, Tag } from '@/src/ui';
 import { useStore } from '@/src/store';
+import { listingName } from '@/src/actions';
 import { ADOPTION_PHOTOS, PROMO_PHOTOS, adoptionPhoto, type AdoptionPhotoKey } from '@/src/photos';
 import type { AdoptionListing } from '@/src/data';
 import { color, font, pastel, radius, shadow, space, type } from '@/src/theme';
@@ -58,11 +59,11 @@ export function AdoptionList({ mine, tab }: { mine?: boolean; tab?: boolean }) {
           )
         ) : (
           <>
-            {mine && list.length === 0 ? null : <Button label="List an animal" icon={Plus} variant="outline" style={styles.listBtn} onPress={() => requireAccount('Sign in to list an animal', () => setCreating(true))} />}
+            {mine && list.length === 0 ? null : <Button label="List an animal for adoption" icon={Plus} variant="outline" style={styles.listBtn} onPress={() => requireAccount('Sign in to list an animal', () => setCreating(true))} />}
             {list.length === 0 ? (
               mine ? (
                 <EmptyPets title="You haven’t listed an animal for adoption." image={PROMO_PHOTOS.basketFriends}>
-                  <Button label="List an animal" icon={Plus} variant="outline" style={styles.listBtn} onPress={() => requireAccount('Sign in to list an animal', () => setCreating(true))} />
+                  <Button label="List an animal for adoption" icon={Plus} variant="outline" style={styles.listBtn} onPress={() => requireAccount('Sign in to list an animal', () => setCreating(true))} />
                 </EmptyPets>
               ) : (
                 <Text style={[type.label, { textAlign: 'center', marginTop: space[6] }]}>No animals listed for adoption near you right now.</Text>
@@ -87,7 +88,8 @@ function Tile({ a, i }: { a: AdoptionListing; i: number }) {
         <AnimalPhoto species={a.species} photo={adoptionPhoto(a)} count={a.media && a.media.length > 1 ? a.media.length : undefined} style={{ height: 130, borderRadius: radius.sm }} iconSize={44} />
         <View style={{ padding: space[3], gap: 4 }}>
           <Tag label={a.status} tone={a.status === 'Adopted' ? 'success' : 'amber'} />
-          <Text style={type.section} numberOfLines={1}>{a.name ?? (a.species === 'dog' ? 'Dog' : a.species === 'cat' ? 'Cat' : 'Animal')} · {a.age}</Text>
+          <Text style={type.section} numberOfLines={1}>{listingName(a)}</Text>
+          <Text style={[type.caption, { color: color.ink }]} numberOfLines={1}>{a.age}</Text>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
             <MapPin size={12} color={color.inkSecondary} />
             <Text style={type.caption}>{a.area}</Text>
@@ -105,20 +107,55 @@ const DEMO_MEDIA: Record<Species, AdoptionPhotoKey[]> = {
   other: ['puppy-tan', 'kitten-white-tabby', 'dog-golden', 'kitten-calico'],
 };
 
+const AGES = ['Under 1 month', '1–3 months', '3–6 months', '6–12 months', '1–2 years', '2–5 years', '5–8 years', 'Over 8 years', 'Not sure'] as const;
+
+/** Approximate age as a dropdown: tap the field to open the list of age ranges below it. */
+function AgeSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <View style={{ gap: space[1] }}>
+      <PressableScale onPress={() => setOpen((x) => !x)} accessibilityLabel="Approximate age" accessibilityState={{ expanded: open }} style={[styles.select, open && styles.selectOpen]} scaleTo={0.99}>
+        <Text style={[styles.selectText, !value && { color: color.inkSubtle }]}>{value || 'Approximate age'}</Text>
+        <ChevronDown size={18} color={color.inkSecondary} style={{ transform: [{ rotate: open ? '180deg' : '0deg' }] }} />
+      </PressableScale>
+      {open ? (
+        <Animated.View entering={FadeInDown.duration(160)} style={styles.options}>
+          {AGES.map((a, i) => {
+            const on = value === a;
+            return (
+              <PressableScale key={a} onPress={() => { onChange(a); setOpen(false); }} accessibilityRole="radio" accessibilityState={{ selected: on }} accessibilityLabel={a} style={[styles.option, i > 0 && styles.optionLine, on && styles.optionOn]} scaleTo={0.99}>
+                <Text style={[styles.optionText, on && { color: color.action, fontFamily: font.bold }]}>{a}</Text>
+                {on ? <Check size={16} color={color.action} strokeWidth={2.6} /> : null}
+              </PressableScale>
+            );
+          })}
+        </Animated.View>
+      ) : null}
+    </View>
+  );
+}
+
 function CreateSheet({ visible, onClose, onSubmit }: { visible: boolean; onClose: () => void; onSubmit: (l: Omit<AdoptionListing, 'id' | 'status' | 'mine' | 'poster'>) => void }) {
+  // Demo mode: the form arrives filled in with a fictional kitten so the flow can be tried in one tap.
   const [species, setSpecies] = useState<Species>('cat');
-  const [gender, setGender] = useState<AdoptionListing['gender']>('Unknown');
-  const [vacc, setVacc] = useState<AdoptionListing['vaccination']>('Unknown');
-  const [name, setName] = useState('');
-  const [age, setAge] = useState('');
-  const [description, setDescription] = useState('');
-  const [media, setMedia] = useState<{ id: number; kind: 'photo' | 'video'; photo: AdoptionPhotoKey }[]>([]);
+  const [gender, setGender] = useState<AdoptionListing['gender']>('Female');
+  const [vacc, setVacc] = useState<AdoptionListing['vaccination']>('Partially vaccinated');
+  const [name, setName] = useState('Coco');
+  const [age, setAge] = useState('3–6 months');
+  const [description, setDescription] = useState('Found alone near a bus stop as a tiny kitten. Now healthy, playful and litter-trained. Loves a warm lap.');
+  const [media, setMedia] = useState<{ id: number; kind: 'photo' | 'video'; photo: AdoptionPhotoKey }[]>([
+    { id: 1, kind: 'photo', photo: 'kitten-white-tabby' },
+    { id: 2, kind: 'photo', photo: 'kitten-calico' },
+  ]);
   const ok = age.trim() && description.trim();
   // SIMULATED DEMO: the camera and gallery hand back sample photos; the gallery alternates in a video.
   const add = (kind: 'photo' | 'video') => setMedia((m) => (m.length >= 4 ? m : [...m, { id: Date.now(), kind, photo: DEMO_MEDIA[species][m.length % 4] }]));
   return (
     <SheetDialog visible={visible} onClose={onClose}>
-      <Text style={type.title}>List an animal</Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Text style={type.title}>List an animal</Text>
+        <View style={styles.demo}><Text style={styles.demoText}>Demo</Text></View>
+      </View>
       <View style={{ gap: space[2] }}>
         <Text style={styles.label}>Photos and videos <Text style={styles.optional}>Up to 4</Text></Text>
         <View style={styles.mediaRow}>
@@ -148,7 +185,7 @@ function CreateSheet({ visible, onClose, onSubmit }: { visible: boolean; onClose
       </View>
       <View style={styles.row}>{(['dog', 'cat', 'other'] as Species[]).map((s) => <Pill key={s} label={s === 'dog' ? 'Dog' : s === 'cat' ? 'Cat' : 'Other'} selected={species === s} onPress={() => setSpecies(s)} />)}</View>
       <TextInput style={styles.input} placeholder="Name (if known)" placeholderTextColor={color.inkSubtle} value={name} onChangeText={setName} accessibilityLabel="Name" />
-      <TextInput style={styles.input} placeholder="Approximate age, e.g. ~4 months" placeholderTextColor={color.inkSubtle} value={age} onChangeText={setAge} accessibilityLabel="Approximate age" />
+      <AgeSelect value={age} onChange={setAge} />
       <View style={styles.row}>{(['Male', 'Female', 'Unknown'] as const).map((g) => <Pill key={g} label={g} selected={gender === g} onPress={() => setGender(g)} />)}</View>
       <TextInput style={[styles.input, { minHeight: 70 }]} multiline placeholder="Description" placeholderTextColor={color.inkSubtle} value={description} onChangeText={setDescription} accessibilityLabel="Description" />
       <View style={styles.row}>{(['Vaccinated', 'Partially vaccinated', 'Not vaccinated', 'Unknown'] as const).map((v) => <Pill key={v} label={v} selected={vacc === v} onPress={() => setVacc(v)} />)}</View>
@@ -165,6 +202,16 @@ const styles = StyleSheet.create({
   tileWrap: { width: '47.8%' },
   tile: { backgroundColor: color.surface, borderRadius: radius.md, overflow: 'hidden', ...shadow.card },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: space[2] },
+  select: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderWidth: 1, borderColor: color.line, borderRadius: radius.md, paddingHorizontal: space[3], minHeight: 46 },
+  selectOpen: { borderColor: color.action },
+  selectText: { fontFamily: font.regular, fontSize: 15, color: color.ink },
+  options: { borderWidth: 1, borderColor: color.line, borderRadius: radius.md, backgroundColor: color.surface, overflow: 'hidden', ...shadow.card },
+  option: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: space[3], minHeight: 44 },
+  optionLine: { borderTopWidth: 1, borderTopColor: color.line },
+  optionOn: { backgroundColor: color.surfaceTint },
+  optionText: { fontFamily: font.regular, fontSize: 14.5, color: color.ink },
+  demo: { backgroundColor: color.amberTint, borderRadius: radius.pill, paddingHorizontal: 9, paddingVertical: 3 },
+  demoText: { fontFamily: font.bold, fontSize: 11, color: color.amberInk, letterSpacing: 0.4 },
   label: { fontFamily: font.bold, fontSize: 13, color: color.inkSecondary },
   optional: { fontFamily: font.semibold, fontSize: 12, color: color.inkMuted },
   mediaRow: { flexDirection: 'row', flexWrap: 'wrap', gap: space[2] },

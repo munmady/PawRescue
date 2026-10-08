@@ -6,6 +6,7 @@ import { Cake, ClipboardCheck, MapPin, MessageCircle, Play, Smile, Syringe, Venu
 import { useState } from 'react';
 import { AnimalPhoto, Button, PressableScale, ScreenHeader, SelectCheck, SheetDialog, Tag } from '@/src/ui';
 import { useStore } from '@/src/store';
+import { listingName, listingRef } from '@/src/actions';
 import { ADOPTION_PHOTOS, adoptionPhoto } from '@/src/photos';
 import { color, font, pastel, radius, shadow, space, type, type PastelName } from '@/src/theme';
 
@@ -27,7 +28,8 @@ export default function AdoptionDetail() {
   // message in the prototype, so a listing with no chats offers two fictional demo names.
   const chatted = [...new Set(adoptionChats.filter((m) => m.listingId === a.id && !m.mine).map((m) => m.from))];
   const candidates = chatted.length ? chatted : ['Riya (demo)', 'Arjun (demo)'];
-  const name = a.name ?? (a.species === 'dog' ? 'Dog' : a.species === 'cat' ? 'Cat' : 'Animal');
+  const name = listingName(a);
+  const ref = listingRef(a);
   const photoW = Math.min(width, 440) - space[5] * 2 - 2;
   const gallery = a.media ?? [];
   const facts: { icon: LucideIcon; k: string; v: string; tone: PastelName }[] = [
@@ -88,7 +90,7 @@ export default function AdoptionDetail() {
 
         {/* About */}
         <Animated.View entering={FadeInDown.delay(90).duration(300)} style={styles.card}>
-          <Text style={styles.cardTitle}>About {name}</Text>
+          <Text style={styles.cardTitle}>About {ref}</Text>
           <Text style={[type.body, { color: color.ink }]}>{a.description}</Text>
           {a.temperament ? <InfoRow icon={Smile} tone="sky" label="Temperament" value={a.temperament} /> : null}
           {a.requirements ? <InfoRow icon={ClipboardCheck} tone="sage" label="Adoption requirements" value={a.requirements} /> : null}
@@ -106,8 +108,8 @@ export default function AdoptionDetail() {
       {footer ? <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, space[4]) }]}>{footer}</View> : null}
 
       <SheetDialog visible={picking} onClose={() => setPicking(false)}>
-        <Text style={type.title}>Who adopted {name}?</Text>
-        <Text style={type.label}>Choose the person from your chats. {name} will appear under Adopted by you on their profile.</Text>
+        <Text style={type.title}>Who adopted {ref}?</Text>
+        <Text style={type.label}>Choose the person from your chats. {a.name ?? `The ${a.species === 'other' ? 'animal' : a.species}`} will appear under Adopted by you on their profile.</Text>
         <View style={{ gap: space[2] }}>
           {[...candidates, 'Someone else'].map((p) => {
             const on = adopter === p;

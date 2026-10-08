@@ -9,6 +9,9 @@ import {
 import { adoptionReply, caseReplies, typingDelay } from './chatReplies';
 import { caseTitle } from './actions';
 
+export type ToastTone = 'success' | 'info' | 'demo';
+export interface Toast { id: number; text: string; sub?: string; tone: ToastTone }
+
 export interface Account {
   name: string;
   email: string;
@@ -36,8 +39,9 @@ interface Store {
   adoptions: AdoptionListing[];
   foodRequests: FoodRequest[];
   donations: Donation[];
-  toast: { id: number; text: string } | null;
-  showToast: (text: string) => void;
+  toast: Toast | null;
+  /** Popup message. `tone` sets the icon (done / info / demo); a demo note is detected from the text. */
+  showToast: (text: string, opts?: { sub?: string; tone?: ToastTone }) => void;
   /** Runs `action` now if signed in, otherwise opens account setup and runs it after (D111, D137). */
   requireAccount: (reason: string, action: () => void) => void;
   completeAccount: (a: Account) => void;
@@ -85,7 +89,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   // Starts high so runtime ids (a…, m…, d…) never collide with seed ids like a1 or m1.
   const seq = useRef(1000);
 
-  const showToast = useCallback((text: string) => setToast({ id: seq.current++, text }), []);
+  const showToast = useCallback((text: string, opts?: { sub?: string; tone?: ToastTone }) =>
+    setToast({ id: seq.current++, text, sub: opts?.sub, tone: opts?.tone ?? (/demo/i.test(text) ? 'demo' : 'success') }), []);
 
   const patchCase = useCallback((id: string, patch: Partial<Case>, event?: string) => {
     setCases((cs) => cs.map((c) => (c.id === id ? { ...c, ...patch, events: event ? [...c.events, { at: Date.now(), label: event }] : c.events } : c)));
@@ -136,10 +141,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const value = useMemo<Store>(() => ({
     account, cases, chats, reportedIds, transportedIds, adoptions, foodRequests, donations, toast, adoptionChats, typing,
     showToast, requireAccount, completeAccount,
-    signOut: () => { setAccount(null); showToast('Signed out'); },
+    signOut: () => { setAccount(null); showToast('Signed out', { tone: 'info' }); },
     submitReport,
-    cancelReport: (id) => { patchCase(id, { status: 'CANCELLED' }, 'Cancelled by reporter'); showToast('Report cancelled'); },
-    reportPassedAway: (id) => { patchCase(id, { deathReportedPending: true }, 'Passed away reported, awaiting confirmation'); showToast('Thank you. A hospital or rescue organisation will confirm.'); },
+    cancelReport: (id) => { patchCase(id, { status: 'CANCELLED' }, 'Cancelled by reporter'); showToast('Report cancelled', { tone: 'info', sub: 'It no longer shows on Home' }); },
+    reportPassedAway: (id) => { patchCase(id, { deathReportedPending: true }, 'Passed away reported, awaiting confirmation'); showToast('Thank you. A hospital or rescue organisation will confirm.', { tone: 'info' }); },
     startTransport: (id, hospitalName) => {
       setCases((cs) => cs.map((c) => (c.id === id && c.status === 'NEW'
         ? { ...c, status: 'RESPONDER_TO_HOSPITAL', hospitalName, events: [...c.events, { at: Date.now(), label: 'Responder taking animal to hospital' }] }
@@ -148,7 +153,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       // SIMULATED DEMO: the selected hospital confirms arrival only after the responder arrives (D110).
     },
     markArrived: (id) => {
-      showToast('Arrival recorded. The hospital will confirm.');
+      showToast('Arrival recorded. The hospital will confirm.', { tone: 'success' });
       setTimeout(() => patchCase(id, { status: 'AT_HOSPITAL' }, 'Hospital reached'), 6000);
     },
     postMessage: (caseId, text) => {
@@ -176,7 +181,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       }
       return true;
     },
-    flagMessage: () => showToast('Thanks for flagging this. Our team will review it.'),
+    flagMessage: () => showToast('Thanks for flagging this. Our team will review it.', { tone: 'info' }),
     retryMessage: (mid) => setChats((m) => m.map((x) => (x.id === mid ? { ...x, failed: false } : x))),
     donate: (d) => {
       const id = `d${seq.current++}`;
@@ -185,9 +190,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setTimeout(() => setDonations((ds) => ds.map((x) => (x.id === id ? { ...x, delivery: 'Out for delivery' } : x))), 12000);
       setTimeout(() => setDonations((ds) => ds.map((x) => (x.id === id ? { ...x, delivery: 'Delivered' } : x))), 40000);
     },
-    addListing: (l) => { setAdoptions((a) => [{ ...l, id: `a${seq.current++}`, status: 'Available', mine: true, poster: account?.name.split(' ')[0] ?? 'You' }, ...a]); showToast('Listing published'); },
-    markAdopted: (id, adopter) => { setAdoptions((a) => a.map((x) => (x.id === id ? { ...x, status: 'Adopted', adopter } : x))); showToast('Marked as adopted'); },
-    removeListing: (id) => { setAdoptions((a) => a.filter((x) => x.id !== id)); showToast('Listing removed'); },
+    addListing: (l) => { setAdoptions((a) => [{ ...l, id: `a${seq.current++}`, status: 'Available', mine: true, poster: account?.name.split(' ')[0] ?? 'You' }, ...a]); showToast('Listing published', { sub: `${l.name ?? 'Your animal'} is now on Adopt a pet` }); },
+    markAdopted: (id, adopter) => { setAdoptions((a) => a.map((x) => (x.id === id ? { ...x, status: 'Adopted', adopter } : x))); showToast('Marked as adopted', { sub: 'Thank you for finding them a home' }); },
+    removeListing: (id) => { setAdoptions((a) => a.filter((x) => x.id !== id)); showToast('Listing removed', { tone: 'info', sub: 'It no longer shows on Adopt a pet' }); },
     sendAdoptionMessage: (listingId, text) => {
       if (ABUSE.some((r) => r.test(text))) return false;
       const failed = /fail/i.test(text);
