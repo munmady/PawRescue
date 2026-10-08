@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { ChevronRight } from 'lucide-react-native';
@@ -9,17 +9,30 @@ import { AnimalPhoto, Pill, PressableScale, ScreenHeader, StatusChip } from '@/s
 import { timeAgo, useStore } from '@/src/store';
 import { color, radius, shadow, space, type } from '@/src/theme';
 
-/** My Reports (D88): cases I reported and cases I personally started transporting. */
+/**
+ * My Reports (D88): cases I reported and cases I personally started transporting.
+ * `?show=reported` lists only my reports; `?show=transported` only the cases I took to care
+ * as a responder (from Profile > Your impact).
+ */
 export default function MyReports() {
   const insets = useSafeAreaInsets();
+  const { show } = useLocalSearchParams<{ show?: 'reported' | 'transported' }>();
   const { cases, reportedIds, transportedIds } = useStore();
   const [tab, setTab] = useState<'all' | 'active' | 'closed'>('all');
-  const mine = cases.filter((c) => reportedIds.includes(c.id) || transportedIds.includes(c.id));
+  const mine = cases.filter((c) =>
+    show === 'reported' ? reportedIds.includes(c.id)
+      : show === 'transported' ? transportedIds.includes(c.id)
+        : reportedIds.includes(c.id) || transportedIds.includes(c.id));
+  const title = show === 'reported' ? 'Cases reported' : show === 'transported' ? 'Taken to care' : 'My reports';
+  const empty = show === 'transported'
+    ? 'No cases yet. Animals you take to a veterinary hospital as a responder will appear here.'
+    : show === 'reported' ? 'No reports yet. Animals you report will appear here.'
+      : 'No reports yet. Cases you report or take to care will appear here.';
   const closed = (s: string) => s === 'CLOSED' || s === 'CANCELLED';
   const list = tab === 'all' ? mine : mine.filter((c) => (tab === 'closed' ? closed(c.status) : !closed(c.status)));
   return (
     <View style={{ flex: 1, backgroundColor: color.page, paddingTop: insets.top }}>
-      <ScreenHeader title="My reports" />
+      <ScreenHeader title={title} />
       <View style={styles.tabs}>
         <Pill label="All" selected={tab === 'all'} onPress={() => setTab('all')} />
         <Pill label="Active" selected={tab === 'active'} onPress={() => setTab('active')} />
@@ -27,7 +40,7 @@ export default function MyReports() {
       </View>
       <ScrollView contentContainerStyle={{ padding: space[5], gap: space[3] }}>
         {list.length === 0 ? (
-          <Text style={[type.label, { textAlign: 'center', marginTop: space[8] }]}>No reports yet. Cases you report or take to care will appear here.</Text>
+          <Text style={[type.label, { textAlign: 'center', marginTop: space[8] }]}>{empty}</Text>
         ) : list.map((c, i) => (
           <Animated.View key={c.id} entering={FadeInDown.delay(i * 50)}>
             <PressableScale onPress={() => router.push(`/case/${c.id}`)} accessibilityLabel={`Open ${c.title}`} style={styles.row}>

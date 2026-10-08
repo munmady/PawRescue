@@ -12,6 +12,7 @@ import type { AdoptionListing } from '@/src/data';
 import { color, font, pastel, radius, shadow, space, type } from '@/src/theme';
 import { PastelBackdrop } from '@/src/PastelBackdrop';
 import { ProfileButton } from '@/src/ProfileButton';
+import { EmptyPets } from '@/src/EmptyPets';
 
 /**
  * Adoption (D94, D103, D125, D126, D135). Never on the distress map. No pet management.
@@ -38,9 +39,11 @@ export function AdoptionList({ mine, tab }: { mine?: boolean; tab?: boolean }) {
       <ScrollView contentContainerStyle={{ padding: space[5], paddingTop: tab ? space[3] : space[5], gap: space[4], paddingBottom: tab ? 130 : space[8] }} showsVerticalScrollIndicator={false}>
         <Button label="List an animal" icon={Plus} variant="outline" style={styles.listBtn} onPress={() => requireAccount('Sign in to list an animal', () => setCreating(true))} />
         {list.length === 0 ? (
-          <Text style={[type.label, { textAlign: 'center', marginTop: space[6] }]}>
-            {mine ? 'You haven’t listed an animal for adoption.' : 'No animals listed for adoption near you right now.'}
-          </Text>
+          mine ? (
+            <EmptyPets title="You haven’t listed an animal for adoption." />
+          ) : (
+            <Text style={[type.label, { textAlign: 'center', marginTop: space[6] }]}>No animals listed for adoption near you right now.</Text>
+          )
         ) : (
           <View style={styles.grid}>
             {list.map((a, i) => <Tile key={a.id} a={a} i={i} />)}

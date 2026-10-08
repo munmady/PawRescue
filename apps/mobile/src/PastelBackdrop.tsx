@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 
@@ -25,7 +26,10 @@ export function PastelBackdrop({ height = 300 }: { variant?: 'home' | 'adoption'
 }
 
 /** Gradient (two or more evenly spaced stops) filling its (rounded, overflow-hidden) parent. Diagonal by default. */
-export function GradientFill({ colors, id, horizontal, vertical }: { colors: readonly [string, string] | readonly string[]; id: string; horizontal?: boolean; vertical?: boolean }) {
+export function GradientFill({ colors, id: base, horizontal, vertical }: { colors: readonly [string, string] | readonly string[]; id: string; horizontal?: boolean; vertical?: boolean }) {
+  // Always unique: on web, a duplicate id (the same page open twice in the stack, or a hidden tab)
+  // makes the browser use the first, possibly hidden, gradient and this one stops painting.
+  const id = `${base}-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
   return (
     <View pointerEvents="none" style={StyleSheet.absoluteFill}>
       <Svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">

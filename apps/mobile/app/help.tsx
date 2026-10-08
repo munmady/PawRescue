@@ -5,6 +5,7 @@ import { router } from 'expo-router';
 import { Baby, Car, ChevronRight, Droplets, HeartPulse, type LucideIcon } from 'lucide-react-native';
 import { GradientFill } from '@/src/PastelBackdrop';
 import { PROMO_PHOTOS } from '@/src/photos';
+import { StandaloneNavBar } from '@/src/BottomNav';
 import { PressableScale, ScreenHeader } from '@/src/ui';
 import { color, pastel, radius, shadow, space, type, type PastelName } from '@/src/theme';
 
@@ -20,7 +21,7 @@ export default function Help() {
   return (
     <View style={{ flex: 1, backgroundColor: color.page, paddingTop: insets.top }}>
       <ScreenHeader title="Help and safety" />
-      <ScrollView contentContainerStyle={{ padding: space[5], gap: space[3], paddingBottom: space[8] }}>
+      <ScrollView contentContainerStyle={{ padding: space[5], gap: space[3], paddingBottom: 130 }}>
         {SECTIONS.map((s, i) => (
           <Animated.View key={s.title} entering={FadeInDown.delay(i * 60)} style={styles.card}>
             <View style={styles.head}>
@@ -46,6 +47,7 @@ export default function Help() {
           <View style={styles.faqGo}><ChevronRight size={18} color="#ffffff" /></View>
         </PressableScale>
       </ScrollView>
+      <StandaloneNavBar />
     </View>
   );
 }

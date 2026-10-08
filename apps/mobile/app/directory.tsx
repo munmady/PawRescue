@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown, LinearTransition } from 'react-native-reanimated';
-import { BadgeCheck, Building2, Clock, MapPin, Phone, Stethoscope } from 'lucide-react-native';
+import { BadgeCheck, Building2, Clock, MapPin, Phone, Plus, Stethoscope } from 'lucide-react-native';
+import { router } from 'expo-router';
 import { Button, PressableScale, ScreenHeader } from '@/src/ui';
 import { useStore } from '@/src/store';
 import { DEMO_CALL } from '@/src/actions';
 import { ORGANISATIONS } from '@/src/data';
+import { StandaloneNavBar } from '@/src/BottomNav';
 import { color, radius, shadow, space, type } from '@/src/theme';
 
 /** Public directory (D102): information only; never the transport destination picker. */
@@ -17,7 +19,8 @@ export default function Directory() {
   return (
     <View style={{ flex: 1, backgroundColor: color.page, paddingTop: insets.top }}>
       <ScreenHeader title="Vets and organisations" />
-      <ScrollView contentContainerStyle={{ padding: space[5], gap: space[3] }}>
+      <ScrollView contentContainerStyle={{ padding: space[5], gap: space[3], paddingBottom: 130 }}>
+        <Button label="Register your organisation" icon={Plus} variant="outline" onPress={() => router.push('/register-org')} />
         <Text style={type.label}>Registered veterinary hospitals, rescue organisations and shelter homes near you.</Text>
         {ORGANISATIONS.map((o, i) => {
           const Icon = o.type === 'Veterinary hospital' ? Stethoscope : Building2;
@@ -49,6 +52,7 @@ export default function Directory() {
         })}
         <Text style={type.caption}>All organisations in this prototype are fictional.</Text>
       </ScrollView>
+      <StandaloneNavBar />
     </View>
   );
 }

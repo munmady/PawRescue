@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
   retry: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, height: 30, borderRadius: radius.pill, backgroundColor: color.surfaceTint },
   retryText: { fontFamily: font.bold, fontSize: 12, color: color.action },
   blocked: { marginHorizontal: space[5], marginBottom: space[2], fontFamily: font.semibold, fontSize: 13, color: color.urgent },
-  composer: { flexDirection: 'row', alignItems: 'flex-end', gap: space[2], paddingHorizontal: space[4], paddingTop: space[3], backgroundColor: color.surface, borderTopWidth: 1, borderTopColor: color.line },
+  composer: { flexDirection: 'row', alignItems: 'center', gap: space[2], paddingHorizontal: space[4], paddingTop: space[3], backgroundColor: color.surface, borderTopWidth: 1, borderTopColor: color.line },
   input: { flex: 1, minHeight: 44, maxHeight: 120, borderRadius: 22, backgroundColor: color.fill, paddingHorizontal: space[4], paddingVertical: 11, fontFamily: font.regular, fontSize: 15, color: color.ink },
   send: { width: 44, height: 44, borderRadius: 22, backgroundColor: color.action, alignItems: 'center', justifyContent: 'center' },
   details: { borderWidth: 1, borderColor: color.line, borderRadius: radius.md, padding: space[3], fontFamily: font.regular, fontSize: 15, color: color.ink },

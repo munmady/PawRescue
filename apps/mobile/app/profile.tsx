@@ -53,8 +53,8 @@ export default function Profile() {
       <Card delay={110}>
         <Text style={[type.section, { marginBottom: space[3] }]}>Your impact</Text>
         <View style={styles.impact}>
-          <Stat n={reportedIds.length} label="Cases reported" tone="sky" href="/my-reports" />
-          <Stat n={transportedIds.length} label="Taken to care" tone="green" href="/my-reports" />
+          <Stat n={reportedIds.length} label="Cases reported" tone="sky" href="/my-reports?show=reported" />
+          <Stat n={transportedIds.length} label="Taken to care" tone="green" href="/my-reports?show=transported" />
           <Stat n={myListings} label="Adoption listings" tone="lavender" href="/my-adoptions" />
           <Stat n={donations.length} label="Food donations" tone="butter" href="/my-donations" />
         </View>
@@ -78,7 +78,7 @@ export default function Profile() {
 }
 
 /** One impact tile; tapping it opens the matching list (My reports, listings, donations). */
-function Stat({ n, label, tone, href }: { n: number; label: string; tone: PastelName; href: '/my-reports' | '/my-adoptions' | '/my-donations' }) {
+function Stat({ n, label, tone, href }: { n: number; label: string; tone: PastelName; href: '/my-reports?show=reported' | '/my-reports?show=transported' | '/my-adoptions' | '/my-donations' }) {
   const p = pastel[tone];
   return (
     <PressableScale onPress={() => router.push(href)} accessibilityLabel={`${label}: ${n}. Open`} style={[styles.stat, { backgroundColor: p.bg }]} scaleTo={0.96}>
