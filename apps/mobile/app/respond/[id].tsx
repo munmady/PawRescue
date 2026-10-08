@@ -4,13 +4,13 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import {
-  CircleCheck, Hospital as HospitalIcon, Map as MapIcon, MapPin, MessageCircle, Navigation, Phone,
-  ShieldCheck, Smartphone, Square, SquareCheck, type LucideIcon,
+  Hospital as HospitalIcon, Map as MapIcon, MapPin, MessageCircle, Navigation, Phone,
+  ShieldCheck, Square, SquareCheck, type LucideIcon,
 } from 'lucide-react-native';
 import { isProfessionalActive } from '@animal/shared';
 import { casePhoto } from '@/src/photos';
-import { AnimalPhoto, Button, FadeSlide, PressableScale, ScreenHeader, SheetDialog, StatusChip, Tag } from '@/src/ui';
-import { distanceLabel, mobileLabel, useCase, useStore } from '@/src/store';
+import { AnimalPhoto, Button, FadeSlide, PressableScale, ScreenHeader, SheetDialog, StatusChip, Tag, SelectCheck } from '@/src/ui';
+import { distanceLabel, useCase, useStore } from '@/src/store';
 import { DEMO_CALL, problemText } from '@/src/actions';
 import { HOSPITALS, type Hospital } from '@/src/data';
 import { color, font, radius, shadow, space, type } from '@/src/theme';
@@ -30,7 +30,7 @@ export default function Respond() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const c = useCase(id);
   const insets = useSafeAreaInsets();
-  const { account, startTransport, markArrived, showToast } = useStore();
+  const { startTransport, markArrived, showToast } = useStore();
   const [step, setStep] = useState<Step>('go');
   const [notAble, setNotAble] = useState(false);
   const [hospital, setHospital] = useState<Hospital | null>(null);
@@ -52,13 +52,15 @@ export default function Respond() {
       <>
         <View style={styles.safetyCard}>
           <View style={styles.safetyHead}>
-            <ShieldCheck size={18} color={color.successInk} />
-            <Text style={[type.section, { fontSize: 15 }]}>Before you go</Text>
+            <ShieldCheck size={16} color={color.successInk} />
+            <Text style={[type.section, { fontSize: 14, flex: 1 }]}>Before you go</Text>
+            <PressableScale onPress={() => router.push('/help')} accessibilityLabel="Read Help and safety" hitSlop={10} scaleTo={0.95}>
+              <Text style={styles.safetyLink}>Safety tips</Text>
+            </PressableScale>
           </View>
-          <Bullet text="Only approach if it is safe for you and the animal." />
-          <Bullet text="Injured or frightened animals may behave unpredictably. Keep a calm distance." />
-          <Bullet text="If it feels unsafe, wait for a trained rescuer." />
-          <Button label="Read Help and safety" variant="link" onPress={() => router.push('/help')} full={false} style={{ alignSelf: 'flex-start' }} />
+          <Bullet compact text="Approach only if it's safe for you and the animal." />
+          <Bullet compact text="Keep a calm distance. Scared or injured animals can react suddenly." />
+          <Bullet compact text="If it feels unsafe, wait for a trained rescuer." />
         </View>
         <StepCard icon={Navigation} title="Going to the animal">
           {pro ? (
@@ -87,7 +89,7 @@ export default function Respond() {
   if (step === 'at') {
     const open = c.status === 'NEW';
     body = (
-      <StepCard icon={CircleCheck} title="You've reached the animal">
+      <StepCard title="You've reached the animal">
         <StatusChip c={c} />
         <Text style={stepStyles.lead}>
           {open
@@ -120,16 +122,8 @@ export default function Respond() {
 
   if (step === 'transport') {
     body = (
-      <StepCard icon={HospitalIcon} title="Arrange transport">
-        <GroupLabel>1 · Your mobile number</GroupLabel>
-        <View style={styles.mobileRow}>
-          <Smartphone size={18} color={color.inkSecondary} />
-          <Text style={styles.mobile}>{mobileLabel(account?.mobile)}</Text>
-        </View>
-        <Text style={type.label}>Your mobile number is required so the veterinary hospital can contact you during transport.</Text>
-        <PrivacyNote text="Only the hospital you choose will see it, once you start transport." />
-        <Divider />
-        <GroupLabel>2 · Choose a veterinary hospital</GroupLabel>
+      <StepCard title="Arrange transport">
+        <GroupLabel>1 · Choose a veterinary hospital</GroupLabel>
         <View style={{ gap: space[2] }}>
           {HOSPITALS.map((h, i) => {
             const on = hospital?.id === h.id;
@@ -141,7 +135,7 @@ export default function Respond() {
                     <Text style={[type.section, { fontSize: 14 }]}>{h.name}</Text>
                     <Text style={type.caption}>{h.distanceKm} km · about {h.etaMin} min</Text>
                   </View>
-                  <View style={[styles.radio, on && styles.radioOn]}>{on ? <View style={styles.radioDot} /> : null}</View>
+                  <SelectCheck selected={on} />
                 </PressableScale>
               </Animated.View>
             );
@@ -149,7 +143,7 @@ export default function Respond() {
         </View>
 
         <Divider />
-        <GroupLabel>3 · Let the hospital know</GroupLabel>
+        <GroupLabel>2 · Let the hospital know</GroupLabel>
         <Button label="Call hospital" icon={Phone} variant="outline" disabled={!hospital} onPress={() => showToast(DEMO_CALL)} />
         <PressableScale onPress={() => { if (hospital) setInformed((x) => !x); }} accessibilityLabel="I have informed the hospital" accessibilityRole="checkbox" accessibilityState={{ checked: informed, disabled: !hospital }} style={[styles.check, informed && styles.checkOn, !hospital && { opacity: 0.5 }]} scaleTo={0.98}>
           {informed ? <SquareCheck size={22} color={color.action} /> : <Square size={22} color={color.inkMuted} />}
@@ -160,7 +154,7 @@ export default function Respond() {
     );
     footer = (
       <>
-        <Button label="Confirm and start transport" icon={Navigation} disabled={!hospital || !informed} onPress={() => {
+        <Button label="Start transport" icon={Navigation} disabled={!hospital || !informed} onPress={() => {
           if (!hospital) return;
           if (c.status !== 'NEW') { setStep('at'); return; }
           startTransport(c.id, hospital.name);
@@ -174,14 +168,14 @@ export default function Respond() {
   if (step === 'nav2') {
     if (done) {
       body = (
-        <StepCard icon={CircleCheck} tone="success" title="Hospital reached">
+        <StepCard tone="success" title="Hospital reached">
           <Text style={stepStyles.lead}>{c.hospitalName} confirmed the animal arrived. Thank you for helping. You&apos;ll get updates as the animal gets care.</Text>
         </StepCard>
       );
       footer = <Button label="View case" onPress={() => router.replace(`/case/${c.id}`)} />;
     } else {
       body = (
-        <StepCard icon={Navigation} title={`To ${c.hospitalName}`}>
+        <StepCard title={`To ${c.hospitalName}`}>
           <StatusChip c={c} />
           <Button label="Open in Maps" icon={MapIcon} variant="outline" onPress={maps} />
           {arrived ? (
@@ -249,14 +243,10 @@ const styles = StyleSheet.create({
   distanceBox: { backgroundColor: color.fill, borderRadius: radius.md, padding: space[4], gap: 2 },
   distanceN: { fontFamily: font.extrabold, fontSize: 34, color: color.ink, letterSpacing: -1 },
   infoRow: { flexDirection: 'row', alignItems: 'center', gap: space[3] },
-  safetyCard: { backgroundColor: color.successTint, borderRadius: 20, padding: space[4], gap: space[3] },
+  safetyCard: { backgroundColor: color.successTint, borderRadius: radius.md, paddingVertical: space[3], paddingHorizontal: space[4], gap: space[2] },
+  safetyLink: { fontFamily: font.bold, fontSize: 13, color: color.action, textDecorationLine: 'underline' },
   safetyHead: { flexDirection: 'row', alignItems: 'center', gap: space[2] },
   question: { flexDirection: 'row', alignItems: 'flex-start', gap: space[3], backgroundColor: color.surfaceTint, borderRadius: radius.md, padding: space[4] },
-  mobileRow: { flexDirection: 'row', alignItems: 'center', gap: space[2], backgroundColor: color.fill, borderRadius: radius.md, padding: space[4] },
-  radio: { width: 22, height: 22, borderRadius: 11, borderWidth: 2, borderColor: color.inkMuted, alignItems: 'center', justifyContent: 'center' },
-  radioOn: { borderColor: color.action },
-  radioDot: { width: 11, height: 11, borderRadius: 6, backgroundColor: color.action },
-  mobile: { fontFamily: font.bold, fontSize: 18, color: color.ink, letterSpacing: 0.3 },
   hospital: { flexDirection: 'row', alignItems: 'center', gap: space[3], backgroundColor: color.surface, borderRadius: radius.md, padding: space[3], borderWidth: 1, borderColor: color.line },
   hIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: color.surfaceTint, alignItems: 'center', justifyContent: 'center' },
   check: { flexDirection: 'row', alignItems: 'center', gap: space[3], minHeight: 52, paddingHorizontal: space[3], borderRadius: radius.md, borderWidth: 1, borderColor: color.line },

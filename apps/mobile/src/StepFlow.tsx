@@ -34,11 +34,11 @@ function Segment({ filled }: { filled: boolean }) {
 }
 
 /** The one card each step lives in: icon, title, then the step's content. */
-export function StepCard({ icon: Icon, title, tone = 'sky', children }: { icon: LucideIcon; title: string; tone?: 'sky' | 'success'; children?: ReactNode }) {
+export function StepCard({ icon: Icon, title, tone = 'sky', children }: { icon?: LucideIcon; title: string; tone?: 'sky' | 'success'; children?: ReactNode }) {
   const t = tone === 'success' ? { bg: color.successTint, fg: color.successInk } : { bg: pastel.sky.bg, fg: color.action };
   return (
     <Animated.View entering={FadeInDown.duration(280)} style={styles.stepCard}>
-      <View style={[styles.stepIcon, { backgroundColor: t.bg }]}><Icon size={22} color={t.fg} strokeWidth={2.1} /></View>
+      {Icon ? <View style={[styles.stepIcon, { backgroundColor: t.bg }]}><Icon size={22} color={t.fg} strokeWidth={2.1} /></View> : null}
       <Text style={type.title}>{title}</Text>
       {children}
     </Animated.View>
@@ -58,11 +58,11 @@ export function Divider() {
   return <View style={styles.divider} />;
 }
 
-export function Bullet({ text }: { text: string }) {
+export function Bullet({ text, compact }: { text: string; compact?: boolean }) {
   return (
-    <View style={styles.bullet}>
-      <View style={styles.bulletDot}><Check size={12} color={color.successInk} strokeWidth={3} /></View>
-      <Text style={[type.body, { flex: 1, color: color.ink }]}>{text}</Text>
+    <View style={[styles.bullet, compact && { gap: space[2] }]}>
+      <View style={[styles.bulletDot, compact && styles.bulletDotSm]}><Check size={compact ? 10 : 12} color={color.successInk} strokeWidth={3} /></View>
+      <Text style={[compact ? type.label : type.body, { flex: 1, color: color.ink }]}>{text}</Text>
     </View>
   );
 }
@@ -95,6 +95,7 @@ const styles = StyleSheet.create({
   optional: { fontFamily: font.semibold, fontSize: 12, color: color.inkMuted },
   divider: { height: 1, backgroundColor: color.line, marginVertical: space[1] },
   bullet: { flexDirection: 'row', alignItems: 'flex-start', gap: space[3] },
+  bulletDotSm: { width: 16, height: 16, borderRadius: 8, marginTop: 2, backgroundColor: color.surface },
   bulletDot: { width: 20, height: 20, borderRadius: 10, marginTop: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: color.successTint },
   privacy: { flexDirection: 'row', alignItems: 'center', gap: 6 },
 });

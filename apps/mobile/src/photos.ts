@@ -1,7 +1,8 @@
 import type { ImageSourcePropType } from 'react-native';
 
 /**
- * Demo evidence photos, cropped from media/Stray Animals in Urban Hardship.png.
+ * Demo evidence photos. Main photos (4:3) are cropped from media/Hope and Hardship_ A Pet Rescue Collage.png;
+ * close-ups and the trapped puppy from media/Stray Animals in Urban Hardship.png.
  * Fictional demo content only (is_demo); real evidence comes from reporters.
  */
 export const PHOTOS = {
@@ -22,7 +23,7 @@ export const PHOTOS = {
 
 export type PhotoKey = keyof typeof PHOTOS;
 
-/** Demo adoption portraits, cropped from media/Adorable Pet Adoption Portraits.png. */
+/** Demo adoption portraits (4:3), cropped from media/Hope and Hardship_ A Pet Rescue Collage.png. */
 export const ADOPTION_PHOTOS = {
   'dog-golden': require('../assets/adoption/dog-golden.jpg'),
   'kitten-tabby': require('../assets/adoption/kitten-tabby.jpg'),
@@ -30,6 +31,8 @@ export const ADOPTION_PHOTOS = {
   'cat-orange': require('../assets/adoption/cat-orange.jpg'),
   'dog-black': require('../assets/adoption/dog-black.jpg'),
   'kitten-calico': require('../assets/adoption/kitten-calico.jpg'),
+  'puppy-tan': require('../assets/adoption/puppy-tan.jpg'),
+  'kitten-white-tabby': require('../assets/adoption/kitten-white-tabby.jpg'),
 } satisfies Record<string, ImageSourcePropType>;
 
 export type AdoptionPhotoKey = keyof typeof ADOPTION_PHOTOS;
@@ -50,6 +53,8 @@ export const PROMO_PHOTOS = {
   petFood: require('../assets/promo/pet-food-display.jpg'),
   vets: require('../assets/promo/vets-pets-kit.jpg'),
   safety: require('../assets/promo/safety-kit.jpg'),
+  firstAidKit: require('../assets/promo/first-aid-kit-3d.png'),
+  medicalCall: require('../assets/promo/medical-call-3d.png'),
 } satisfies Record<string, ImageSourcePropType>;
 
 export function adoptionPhoto(a: { photo?: AdoptionPhotoKey }): ImageSourcePropType | undefined {

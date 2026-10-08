@@ -2,22 +2,22 @@ import { useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Animated, { FadeInDown, FadeInRight, useAnimatedStyle, useSharedValue, withSequence, withTiming } from 'react-native-reanimated';
-import { Check, Mail, MailCheck, ShieldCheck, Smartphone, UserRound, type LucideIcon } from 'lucide-react-native';
+import Animated, { FadeInRight, useAnimatedStyle, useSharedValue, withSequence, withTiming } from 'react-native-reanimated';
+import { Check, Mail, Smartphone, UserRound, type LucideIcon } from 'lucide-react-native';
 import { Button, FadeSlide, ScreenHeader } from '@/src/ui';
-import { DEMO_MOBILE, useStore } from '@/src/store';
+import { DEMO_MOBILE, mobileLabel, useStore } from '@/src/store';
 import { color, font, radius, space, type } from '@/src/theme';
 import { Divider, GroupLabel, PrivacyNote, StepCard, StepTracker, stepStyles } from '@/src/StepFlow';
 
-const STAGES = ['Your details', 'Verify email'] as const;
+const STAGES = ['Your details', 'Verify mobile'] as const;
 
 const DEMO_CODE = '246810';
 // Demo mode: the form arrives filled in. Fictional values; Indian mobiles start 6–9, so this number can't be real.
 const DEMO_ACCOUNT = { name: 'Asha', email: 'asha@example.com', mobile: DEMO_MOBILE };
 
 /**
- * One-time account setup (D137): Name → Email → Mobile → Email OTP → signed in.
- * No password, no Google-only sign-in, no SMS code. Email delivery is simulated.
+ * One-time account setup (D137, D144): Name → Email → Mobile → code sent to the mobile → signed in.
+ * No password, no Google-only sign-in. Code delivery is simulated; no real SMS.
  */
 export default function Auth() {
   const insets = useSafeAreaInsets();
@@ -57,15 +57,13 @@ export default function Auth() {
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1, backgroundColor: color.page, paddingTop: insets.top }}>
-      <ScreenHeader title={reason || 'Set up your account'} onBack={step === 'code' ? () => setStep('details') : undefined} />
+      <ScreenHeader title={reason || 'Set up your account'} onBack={step === 'code' ? () => setStep('details') : undefined}
+        right={<View style={styles.demo}><Text style={styles.demoText}>Demo</Text></View>} />
       <StepTracker stages={STAGES} stage={step === 'details' ? 0 : 1} />
       <FadeSlide k={step}>
         <ScrollView contentContainerStyle={{ paddingHorizontal: space[5], paddingTop: space[3], gap: space[3], paddingBottom: space[6] }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
           {step === 'details' ? (
-            <StepCard icon={UserRound} title="Your details">
-              <Text style={stepStyles.lead}>It takes a minute, once: your name, email and mobile, then a code we send to your email.</Text>
-              <DemoNote text="Demo · filled in with sample details. Edit them or tap Send code." />
-              <Divider />
+            <StepCard title="Your details">
               <Field label="Name" icon={UserRound} value={name} onChangeText={setName} placeholder="Priya" error={errors.name} autoComplete="name" />
               <Field label="Email" icon={Mail} value={email} onChangeText={setEmail} placeholder="you@example.com" error={errors.email} keyboardType="email-address" autoComplete="email" />
               <Field label="Mobile number" icon={Smartphone} value={mobile} onChangeText={setMobile} placeholder="98XXX XXXXX" error={errors.mobile} keyboardType="phone-pad" prefix="+91" autoComplete="tel"
@@ -74,9 +72,8 @@ export default function Auth() {
               <PrivacyNote text="Your email and mobile are never shown publicly." />
             </StepCard>
           ) : (
-            <StepCard icon={MailCheck} title="Check your email">
-              <Text style={stepStyles.lead}>Enter the 6-digit code we sent to <Text style={{ fontFamily: font.bold }}>{email}</Text>.</Text>
-              <DemoNote text={`Demo · your code is ${DEMO_CODE}, already filled in`} />
+            <StepCard title="Check your phone">
+              <Text style={stepStyles.lead}>Enter the 6-digit code we sent to <Text style={{ fontFamily: font.bold }}>{mobileLabel(mobile.replace(/\s/g, '')).replace(' ', ' ')}</Text>.</Text>
               <Divider />
               <GroupLabel>6-digit code</GroupLabel>
               <Animated.View style={shakeStyle}>
@@ -94,15 +91,6 @@ export default function Auth() {
           : <Button label="Verify" icon={Check} onPress={verify} disabled={code.length < 6} />}
       </View>
     </KeyboardAvoidingView>
-  );
-}
-
-function DemoNote({ text }: { text: string }) {
-  return (
-    <Animated.View entering={FadeInDown.delay(120)} style={styles.demoCode}>
-      <ShieldCheck size={16} color={color.amberInk} />
-      <Text style={[type.label, { color: color.amberInk, flex: 1 }]}>{text}</Text>
-    </Animated.View>
   );
 }
 
@@ -161,8 +149,9 @@ const styles = StyleSheet.create({
   inputFocus: { borderColor: color.action, backgroundColor: color.surface },
   inputError: { borderColor: color.urgent },
   inputText: { flex: 1, fontFamily: font.regular, fontSize: 16, color: color.ink, paddingVertical: 12, outlineStyle: 'none' } as never,
+  demo: { backgroundColor: color.amberTint, borderRadius: radius.pill, paddingHorizontal: 9, paddingVertical: 3 },
+  demoText: { fontFamily: font.bold, fontSize: 11, color: color.amberInk, letterSpacing: 0.4 },
   error: { fontFamily: font.semibold, fontSize: 13, color: color.urgent },
-  demoCode: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: color.amberTint, borderRadius: radius.md, padding: space[3] },
   codeRow: { flexDirection: 'row', justifyContent: 'space-between', gap: 8 },
   codeBox: { flex: 1, height: 54, borderRadius: radius.md, backgroundColor: color.fill, borderWidth: 1.5, borderColor: color.line, alignItems: 'center', justifyContent: 'center' },
   codeBoxActive: { borderColor: color.action },

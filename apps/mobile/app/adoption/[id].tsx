@@ -1,72 +1,112 @@
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { MapPin, MessageCircle } from 'lucide-react-native';
-import { AnimalPhoto, Button, ScreenHeader } from '@/src/ui';
+import { Cake, ClipboardCheck, MapPin, MessageCircle, Smile, Syringe, VenusAndMars, type LucideIcon } from 'lucide-react-native';
+import { AnimalPhoto, Button, ScreenHeader, Tag } from '@/src/ui';
 import { useStore } from '@/src/store';
 import { adoptionPhoto } from '@/src/photos';
-import { color, font, radius, shadow, space, type } from '@/src/theme';
+import { color, font, pastel, radius, shadow, space, type, type PastelName } from '@/src/theme';
 
+/**
+ * Adoption listing (ADOPT-02): hero card with the photo inside it, quick facts,
+ * an About card, the poster, and the main action pinned at the bottom (D94, D125).
+ */
 export default function AdoptionDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
   const { adoptions, requireAccount, markAdopted, removeListing } = useStore();
   const a = adoptions.find((x) => x.id === id);
   if (!a) return null;
-  const facts = [
-    { k: 'Age', v: a.age },
-    { k: 'Gender', v: a.gender },
-    { k: 'Vaccination', v: a.vaccination },
+  const name = a.name ?? (a.species === 'dog' ? 'Dog' : a.species === 'cat' ? 'Cat' : 'Animal');
+  const photoW = Math.min(width, 440) - space[5] * 2 - 2;
+  const facts: { icon: LucideIcon; k: string; v: string; tone: PastelName }[] = [
+    { icon: Cake, k: 'Age', v: a.age, tone: 'peach' },
+    { icon: VenusAndMars, k: 'Gender', v: a.gender, tone: 'lavender' },
+    { icon: Syringe, k: 'Vaccination', v: a.vaccination, tone: 'mint' },
   ];
+  const footer = a.mine ? (
+    <>
+      {a.status === 'Available' ? <Button label="Mark adopted" onPress={() => markAdopted(a.id)} /> : null}
+      <Button label="Remove listing" variant="outline" onPress={() => { removeListing(a.id); router.back(); }} />
+    </>
+  ) : a.status === 'Available' ? (
+    <Button label="Chat with poster" icon={MessageCircle} onPress={() => requireAccount('Sign in to chat with the poster', () => router.push(`/adoption/chat/${a.id}`))} />
+  ) : null;
+
   return (
     <View style={{ flex: 1, backgroundColor: color.page, paddingTop: insets.top }}>
-      <ScreenHeader title="" />
-      <ScrollView contentContainerStyle={{ paddingBottom: space[8] }}>
-        <Animated.View entering={FadeInDown.duration(300)} style={styles.hero}>
-          <View style={styles.disc}>
-            <AnimalPhoto species={a.species} photo={adoptionPhoto(a)} style={{ width: 200, height: 200, borderRadius: 100 }} iconSize={80} />
+      <ScreenHeader title="Adopt a pet" />
+      <ScrollView contentContainerStyle={{ paddingHorizontal: space[5], paddingTop: space[2], gap: space[3], paddingBottom: space[6] }} showsVerticalScrollIndicator={false}>
+        {/* Hero card: photo inside, then name, tags and quick facts. */}
+        <Animated.View entering={FadeInDown.duration(300)} style={[styles.card, styles.heroCard]}>
+          <AnimalPhoto species={a.species} photo={adoptionPhoto(a)} style={{ width: photoW, height: 260, borderRadius: 0 }} iconSize={80} />
+          <View style={styles.heroBody}>
+            <Text style={type.display}>{name}</Text>
+            <View style={styles.tags}>
+              <Tag label={a.status} tone={a.status === 'Adopted' ? 'success' : 'amber'} />
+              <Tag label={a.area} tone="neutral" icon={MapPin} />
+            </View>
+            <View style={styles.facts}>
+              {facts.map((f) => (
+                <View key={f.k} style={styles.fact}>
+                  <f.icon size={16} color={pastel[f.tone].ink} />
+                  <Text style={styles.factV} numberOfLines={2}>{f.v}</Text>
+                  <Text style={[type.caption, { color: pastel[f.tone].ink }]}>{f.k}</Text>
+                </View>
+              ))}
+            </View>
           </View>
         </Animated.View>
-        <Animated.View entering={FadeInDown.delay(100)} style={styles.sheet}>
-          <View style={styles.grab} />
-          <Text style={type.display}>{a.name ?? (a.species === 'dog' ? 'Dog' : 'Cat')}</Text>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-            <MapPin size={14} color={color.inkSecondary} /><Text style={type.label}>{a.area} · {a.status}</Text>
+
+        {/* About */}
+        <Animated.View entering={FadeInDown.delay(90).duration(300)} style={styles.card}>
+          <Text style={styles.cardTitle}>About {name}</Text>
+          <Text style={[type.body, { color: color.ink }]}>{a.description}</Text>
+          {a.temperament ? <InfoRow icon={Smile} tone="sky" label="Temperament" value={a.temperament} /> : null}
+          {a.requirements ? <InfoRow icon={ClipboardCheck} tone="sage" label="Adoption requirements" value={a.requirements} /> : null}
+        </Animated.View>
+
+        {/* Poster */}
+        <Animated.View entering={FadeInDown.delay(160).duration(300)} style={[styles.card, styles.posterCard]}>
+          <View style={styles.avatar}><Text style={styles.avatarText}>{a.poster[0]?.toUpperCase()}</Text></View>
+          <View style={{ flex: 1, gap: 2 }}>
+            <Text style={type.caption}>Listed by</Text>
+            <Text style={[type.section, { fontSize: 15 }]}>{a.mine ? 'You' : a.poster}</Text>
           </View>
-          <View style={styles.facts}>
-            {facts.map((f) => (
-              <View key={f.k} style={styles.fact}>
-                <Text style={styles.factV} numberOfLines={2}>{f.v}</Text>
-                <Text style={type.caption}>{f.k}</Text>
-              </View>
-            ))}
-          </View>
-          <Text style={type.section}>About</Text>
-          <Text style={type.body}>{a.description}</Text>
-          {a.temperament ? <Text style={type.body}>Temperament: {a.temperament}</Text> : null}
-          {a.requirements ? <Text style={type.body}>Adoption requirements: {a.requirements}</Text> : null}
-          <Text style={type.caption}>Listed by {a.poster}</Text>
-          {a.mine ? (
-            <View style={{ gap: space[2] }}>
-              {a.status === 'Available' ? <Button label="Mark adopted" onPress={() => markAdopted(a.id)} /> : null}
-              <Button label="Remove listing" variant="outline" onPress={() => { removeListing(a.id); router.back(); }} />
-            </View>
-          ) : a.status === 'Available' ? (
-            <Button label="Chat with poster" icon={MessageCircle} onPress={() => requireAccount('Sign in to chat with the poster', () => router.push(`/adoption/chat/${a.id}`))} />
-          ) : null}
         </Animated.View>
       </ScrollView>
+      {footer ? <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, space[4]) }]}>{footer}</View> : null}
+    </View>
+  );
+}
+
+function InfoRow({ icon: Icon, tone, label, value }: { icon: LucideIcon; tone: PastelName; label: string; value: string }) {
+  return (
+    <View style={styles.infoRow}>
+      <View style={[styles.infoIcon, { backgroundColor: pastel[tone].bg }]}><Icon size={17} color={pastel[tone].ink} /></View>
+      <View style={{ flex: 1, gap: 2 }}>
+        <Text style={type.caption}>{label}</Text>
+        <Text style={[type.label, { color: color.ink }]}>{value}</Text>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  hero: { alignItems: 'center', paddingVertical: space[4] },
-  disc: { width: 240, height: 240, borderRadius: 120, backgroundColor: color.surfaceTint, alignItems: 'center', justifyContent: 'center' },
-  sheet: { backgroundColor: color.surface, borderTopLeftRadius: radius.xl, borderTopRightRadius: radius.xl, padding: space[6], gap: space[3], ...shadow.sheet, minHeight: 420 },
-  grab: { width: 40, height: 4, borderRadius: 2, backgroundColor: color.line, alignSelf: 'center' },
+  card: { backgroundColor: color.surface, borderRadius: 20, padding: space[4], gap: space[3], borderWidth: 1, borderColor: color.line, ...shadow.card },
+  heroCard: { padding: 0, gap: 0, overflow: 'hidden' },
+  heroBody: { padding: space[4], gap: space[3] },
+  tags: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   facts: { flexDirection: 'row', gap: space[2] },
-  fact: { flex: 1, borderWidth: 1, borderColor: color.line, borderRadius: radius.md, paddingVertical: space[3], paddingHorizontal: space[2], alignItems: 'center', gap: 2 },
-  factV: { fontFamily: font.bold, fontSize: 14, color: color.ink, textAlign: 'center' },
+  fact: { flex: 1, backgroundColor: color.surface, borderWidth: 1, borderColor: color.line, borderRadius: radius.md, paddingVertical: space[3], paddingHorizontal: space[2], alignItems: 'center', gap: 3 },
+  factV: { fontFamily: font.bold, fontSize: 13.5, color: color.ink, textAlign: 'center' },
+  cardTitle: { fontFamily: font.bold, fontSize: 16, color: color.ink },
+  infoRow: { flexDirection: 'row', alignItems: 'flex-start', gap: space[3] },
+  infoIcon: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center' },
+  posterCard: { flexDirection: 'row', alignItems: 'center' },
+  avatar: { width: 42, height: 42, borderRadius: 21, backgroundColor: pastel.lavender.bg, alignItems: 'center', justifyContent: 'center' },
+  avatarText: { fontFamily: font.extrabold, fontSize: 17, color: pastel.lavender.ink },
+  footer: { paddingHorizontal: space[5], paddingTop: space[3], gap: space[2], backgroundColor: color.surface, borderTopWidth: 1, borderTopColor: color.line },
 });

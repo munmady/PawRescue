@@ -71,11 +71,11 @@ export default function Report() {
       {step < 4 ? (
         <>
           <View style={styles.top}>
-            <PressableScale onPress={back} accessibilityLabel={step === 0 ? 'Close' : 'Back'} style={styles.iconBtn} scaleTo={0.9}>
-              {step === 0 ? <X size={22} color={color.ink} /> : <ChevronLeft size={24} color={color.ink} />}
+            <PressableScale onPress={back} accessibilityLabel={step === 0 ? 'Close' : 'Back'} style={styles.iconBtn} scaleTo={0.9} hitSlop={8}>
+              {step === 0 ? <X size={17} color={color.ink} strokeWidth={2.2} /> : <ChevronLeft size={19} color={color.ink} strokeWidth={2.2} style={{ marginLeft: -1 }} />}
             </PressableScale>
             <Text style={styles.topTitle}>Report an animal</Text>
-            <View style={{ width: 44 }} />
+            <View style={{ width: 36 }} />
           </View>
           <StepTracker stages={STEP_TITLES} stage={step} />
         </>
@@ -457,9 +457,9 @@ function Sent({ id }: { id: string | null }) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: color.page },
-  top: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: space[3], paddingVertical: space[1], gap: space[2] },
+  top: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: space[5], paddingVertical: space[1], gap: space[2] },
   topTitle: { flex: 1, textAlign: 'center', fontFamily: font.bold, fontSize: 16, color: color.ink },
-  iconBtn: { minWidth: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
+  iconBtn: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', backgroundColor: '#ffffff', borderWidth: 1, borderColor: color.line, boxShadow: '0 2px 8px rgba(47,58,76,0.08)' },
   progress: { height: 6, borderRadius: 3, backgroundColor: color.line, overflow: 'hidden' },
   progressFill: { height: 6, borderRadius: 3, backgroundColor: color.primary },
   tray: { flexDirection: 'row', flexWrap: 'wrap', gap: space[2] },

@@ -4,14 +4,18 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeInDown, ZoomIn } from 'react-native-reanimated';
 import { Check, Minus, Plus } from 'lucide-react-native';
-import { Button, FadeSlide, PressableScale, ScreenHeader, Tag } from '@/src/ui';
+import { Button, FadeSlide, PressableScale, ScreenHeader, Tag, SelectCheck } from '@/src/ui';
 import { useStore } from '@/src/store';
 import { ProductArt } from '@/src/ProductArt';
 import { Celebration } from '@/src/Celebration';
-import { color, font, pastel, radius, shadow, space, type } from '@/src/theme';
+import { color, font, radius, shadow, space, type } from '@/src/theme';
 
-type Step = 'choose' | 'quantity' | 'pay' | 'done';
+type Step = 'donate' | 'done';
 
+/**
+ * Food donation (FOOD-02, D115, D120, D124): one screen to pick a product, set the
+ * quantity and pay, then the thank-you. Payment and delivery are SIMULATED DEMO.
+ */
 export default function FoodRequest() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const insets = useSafeAreaInsets();
@@ -19,68 +23,75 @@ export default function FoodRequest() {
   const r = foodRequests.find((x) => x.id === id);
   const [productId, setProductId] = useState<string | null>(null);
   const [qty, setQty] = useState(1);
-  const [step, setStep] = useState<Step>('choose');
+  const [step, setStep] = useState<Step>('donate');
   const [paying, setPaying] = useState(false);
   if (!r) return null;
   const p = r.products.find((x) => x.id === productId);
   const total = (p?.price ?? 0) * qty;
 
+  const pay = () => requireAccount('Sign in to donate food', () => {
+    if (!p) return;
+    setPaying(true);
+    setTimeout(() => {
+      donate({ requestId: r.id, org: r.org, product: `${p.name} ${p.size}`, kind: p.kind, photo: p.photo, quantity: qty, amount: total });
+      setPaying(false);
+      setStep('done');
+    }, 1100);
+  });
+
   return (
     <View style={{ flex: 1, backgroundColor: color.page, paddingTop: insets.top }}>
-      <ScreenHeader title={step === 'done' ? '' : 'Food donation'} onBack={step === 'quantity' ? () => setStep('choose') : step === 'pay' ? () => setStep('quantity') : undefined} />
+      <ScreenHeader title={step === 'done' ? '' : 'Food donation'} />
       <FadeSlide k={step}>
-        <ScrollView contentContainerStyle={{ padding: space[5], paddingTop: step === 'done' ? 0 : space[5], gap: space[4] }}>
-          {step === 'choose' ? (
+        <ScrollView contentContainerStyle={{ padding: space[5], paddingTop: step === 'done' ? 0 : space[3], gap: space[3], paddingBottom: space[6] }} showsVerticalScrollIndicator={false}>
+          {step === 'donate' ? (
             <>
-              <Text style={type.caption}>{r.org}</Text>
-              <Text style={type.display}>{r.need}</Text>
-              <Text style={type.section}>Select one product to donate</Text>
-              {r.products.map((x, i) => (
-                <Animated.View key={x.id} entering={FadeInDown.delay(i * 50)}>
-                  <PressableScale onPress={() => setProductId(x.id)} accessibilityLabel={`${x.name} ${x.size}`} style={[styles.product, productId === x.id && styles.productOn]} scaleTo={0.98}>
-                    <ProductArt kind={x.kind} fill={x.fill} photo={x.photo} size={64} label={x.size} />
-                    <View style={{ flex: 1, gap: 2 }}>
-                      <Text style={type.section}>{x.name}</Text>
-                      <Text style={type.caption}>{x.size}</Text>
-                    </View>
-                    <Text style={type.section}>₹{x.price}</Text>
-                  </PressableScale>
+              <View style={{ gap: 4 }}>
+                <Text style={type.caption}>{r.org}</Text>
+                <Text style={type.title}>{r.need}</Text>
+              </View>
+
+              {/* 1 · Pick one product */}
+              <View style={styles.card}>
+                <Text style={styles.groupLabel}>1 · Choose a product</Text>
+                {r.products.map((x, i) => {
+                  const on = productId === x.id;
+                  return (
+                    <Animated.View key={x.id} entering={FadeInDown.delay(i * 50)}>
+                      <PressableScale onPress={() => { setProductId(x.id); setQty(1); }} accessibilityLabel={`${x.name} ${x.size}`} accessibilityRole="radio" accessibilityState={{ selected: on }} style={[styles.product, on && styles.productOn]} scaleTo={0.98}>
+                        <ProductArt kind={x.kind} fill={x.fill} photo={x.photo} size={56} label={x.size} />
+                        <View style={{ flex: 1, gap: 2 }}>
+                          <Text style={[type.section, { fontSize: 14.5 }]}>{x.name}</Text>
+                          <Text style={type.caption}>{x.size} · ₹{x.price}</Text>
+                        </View>
+                        <SelectCheck selected={on} />
+                      </PressableScale>
+                    </Animated.View>
+                  );
+                })}
+              </View>
+
+              {/* 2 · Quantity and total, once a product is picked */}
+              {p ? (
+                <Animated.View entering={FadeInDown.duration(250)} style={styles.card}>
+                  <Text style={styles.groupLabel}>2 · How many?</Text>
+                  <View style={styles.qtyRow}>
+                    <Text style={[type.label, { flex: 1, color: color.ink }]}>₹{p.price} each</Text>
+                    <PressableScale onPress={() => setQty((q) => Math.max(1, q - 1))} accessibilityLabel="Decrease quantity" style={styles.qtyBtn} scaleTo={0.9}><Minus size={18} color={color.ink} /></PressableScale>
+                    <Animated.Text key={qty} entering={ZoomIn.duration(160)} style={styles.qtyN}>{qty}</Animated.Text>
+                    <PressableScale onPress={() => setQty((q) => Math.min(20, q + 1))} accessibilityLabel="Increase quantity" style={styles.qtyBtn} scaleTo={0.9}><Plus size={18} color={color.ink} /></PressableScale>
+                  </View>
+                  <View style={styles.divider} />
+                  <View style={styles.totalRow}>
+                    <Text style={[type.section, { flex: 1 }]}>Total</Text>
+                    <Text style={styles.total}>₹{total}</Text>
+                  </View>
                 </Animated.View>
-              ))}
-              <Text style={type.caption}>Delivered to the organisation&apos;s registered address. Product images are for illustration only; no brand partnership is implied.</Text>
-              <Button label="Choose and donate" disabled={!p} onPress={() => requireAccount('Sign in to donate food', () => setStep('quantity'))} />
-            </>
-          ) : null}
+              ) : null}
 
-          {step === 'quantity' && p ? (
-            <>
-              <Animated.View entering={ZoomIn.springify().damping(14)} style={{ alignSelf: 'center' }}>
-                <ProductArt kind={p.kind} fill={p.fill} photo={p.photo} size={148} label={p.size} />
-              </Animated.View>
-              <Text style={type.display}>{p.name} · {p.size}</Text>
-              <Text style={type.label}>₹{p.price} each · to {r.org}</Text>
-              <View style={styles.qty}>
-                <PressableScale onPress={() => setQty((q) => Math.max(1, q - 1))} accessibilityLabel="Decrease quantity" style={styles.qtyBtn} scaleTo={0.9}><Minus size={18} color={color.ink} /></PressableScale>
-                <Animated.Text key={qty} entering={ZoomIn.duration(160)} style={styles.qtyN}>{qty}</Animated.Text>
-                <PressableScale onPress={() => setQty((q) => Math.min(20, q + 1))} accessibilityLabel="Increase quantity" style={styles.qtyBtn} scaleTo={0.9}><Plus size={18} color={color.ink} /></PressableScale>
-              </View>
-              <Text style={[type.title, { textAlign: 'center' }]}>Total ₹{total}</Text>
-              <Button label="Continue to pay" onPress={() => setStep('pay')} />
-            </>
-          ) : null}
-
-          {step === 'pay' && p ? (
-            <>
-              <View style={styles.demo}><Text style={[type.label, { color: color.amberInk }]}>Demo payment: no real money is taken in this prototype.</Text></View>
-              <Text style={type.display}>Pay ₹{total}</Text>
-              <View style={styles.summary}>
-                <ProductArt kind={p.kind} fill={p.fill} photo={p.photo} size={56} label={p.size} />
-                <Text style={[type.label, { flex: 1 }]}>{p.name} {p.size} × {qty} for {r.org}</Text>
-              </View>
-              <Button label={paying ? 'Processing…' : 'Pay'} disabled={paying} onPress={() => {
-                setPaying(true);
-                setTimeout(() => { donate({ requestId: r.id, org: r.org, product: `${p.name} ${p.size}`, kind: p.kind, photo: p.photo, quantity: qty, amount: total }); setPaying(false); setStep('done'); }, 1100);
-              }} />
+              <Text style={type.caption}>
+                Delivered to the organisation&apos;s registered address. Demo payment: no real money is taken. Product images are for illustration only; no brand partnership is implied.
+              </Text>
             </>
           ) : null}
 
@@ -110,6 +121,11 @@ export default function FoodRequest() {
           ) : null}
         </ScrollView>
       </FadeSlide>
+      {step === 'donate' ? (
+        <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, space[4]) }]}>
+          <Button label={paying ? 'Processing…' : p ? `Pay ₹${total}` : 'Choose a product'} disabled={!p || paying} onPress={pay} />
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -123,13 +139,17 @@ function StatusTick({ label, delay }: { label: string; delay: number }) {
 }
 
 const styles = StyleSheet.create({
-  product: { flexDirection: 'row', alignItems: 'center', gap: space[3], backgroundColor: color.surface, borderRadius: radius.md, padding: space[3], borderWidth: 1.5, borderColor: 'transparent', ...shadow.card },
+  card: { backgroundColor: color.surface, borderRadius: 20, padding: space[4], gap: space[3], borderWidth: 1, borderColor: color.line, ...shadow.card },
+  groupLabel: { fontFamily: font.bold, fontSize: 13, color: color.inkSecondary, letterSpacing: 0.2 },
+  product: { flexDirection: 'row', alignItems: 'center', gap: space[3], backgroundColor: color.surface, borderRadius: radius.md, padding: space[3], borderWidth: 1, borderColor: color.line },
   productOn: { borderColor: color.primary, backgroundColor: color.surfaceTint },
-  summary: { flexDirection: 'row', alignItems: 'center', gap: space[3], backgroundColor: color.surface, borderRadius: radius.md, padding: space[3], ...shadow.card },
-  qty: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space[6], paddingVertical: space[4] },
-  qtyBtn: { width: 52, height: 52, borderRadius: 26, backgroundColor: color.surface, alignItems: 'center', justifyContent: 'center', ...shadow.card },
-  qtyN: { fontFamily: font.extrabold, fontSize: 36, color: color.ink, minWidth: 48, textAlign: 'center' },
-  demo: { backgroundColor: color.amberTint, borderRadius: radius.md, padding: space[3] },
+  qtyRow: { flexDirection: 'row', alignItems: 'center', gap: space[3] },
+  qtyBtn: { width: 44, height: 44, borderRadius: 22, backgroundColor: color.fill, alignItems: 'center', justifyContent: 'center' },
+  qtyN: { fontFamily: font.extrabold, fontSize: 24, color: color.ink, minWidth: 32, textAlign: 'center' },
+  divider: { height: 1, backgroundColor: color.line },
+  totalRow: { flexDirection: 'row', alignItems: 'center' },
+  total: { fontFamily: font.extrabold, fontSize: 22, color: color.ink },
+  footer: { paddingHorizontal: space[5], paddingTop: space[3], backgroundColor: color.surface, borderTopWidth: 1, borderTopColor: color.line },
   thanks: { alignItems: 'center', gap: space[3] },
   center: { textAlign: 'center' },
   receipt: { alignSelf: 'stretch', flexDirection: 'row', alignItems: 'center', gap: space[3], marginTop: space[2], padding: space[3], borderRadius: radius.md, backgroundColor: color.surface, borderWidth: 1, borderColor: color.line, ...shadow.card },

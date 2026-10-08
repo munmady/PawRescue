@@ -13,7 +13,7 @@ export function FaqList() {
     <View style={{ gap: space[3] }}>
       {FAQS.map((f, i) => (
         <Animated.View key={f.q} entering={FadeInDown.delay(i * 40).duration(280)}>
-          <FaqItem f={f} open={open === i} onToggle={() => setOpen(open === i ? null : i)} />
+          <FaqItem f={f} n={i + 1} open={open === i} onToggle={() => setOpen(open === i ? null : i)} />
         </Animated.View>
       ))}
       <View style={styles.disclaimer}>
@@ -26,11 +26,12 @@ export function FaqList() {
   );
 }
 
-function FaqItem({ f, open, onToggle }: { f: Faq; open: boolean; onToggle: () => void }) {
+function FaqItem({ f, n, open, onToggle }: { f: Faq; n: number; open: boolean; onToggle: () => void }) {
   const chevron = useAnimatedStyle(() => ({ transform: [{ rotate: withTiming(open ? '180deg' : '0deg', { duration: 200 }) }] }));
   return (
     <View style={[styles.faq, open && styles.faqOpen]}>
       <PressableScale onPress={onToggle} accessibilityLabel={f.q} accessibilityState={{ expanded: open }} style={styles.faqQ} scaleTo={0.99}>
+        <View style={[styles.num, open && styles.numOpen]}><Text style={[styles.numText, open && { color: '#ffffff' }]}>{n}</Text></View>
         <Text style={[type.section, { flex: 1, fontSize: 15 }]}>{f.q}</Text>
         <Animated.View style={chevron}><ChevronDown size={20} color={color.inkSecondary} /></Animated.View>
       </PressableScale>
@@ -63,6 +64,9 @@ const styles = StyleSheet.create({
   faq: { backgroundColor: color.surface, borderRadius: radius.md, borderWidth: 1, borderColor: color.line, overflow: 'hidden' },
   faqOpen: { borderColor: color.primary, ...shadow.card },
   faqQ: { flexDirection: 'row', alignItems: 'center', gap: space[3], minHeight: 56, paddingHorizontal: space[4], paddingVertical: space[3] },
+  num: { width: 26, height: 26, borderRadius: 13, backgroundColor: color.surfaceTint, alignItems: 'center', justifyContent: 'center' },
+  numOpen: { backgroundColor: color.action },
+  numText: { fontFamily: font.bold, fontSize: 12.5, color: color.action },
   faqA: { paddingHorizontal: space[4], paddingBottom: space[4], gap: space[3] },
   contacts: { backgroundColor: color.fill, borderRadius: radius.md, paddingHorizontal: space[3] },
   contact: { flexDirection: 'row', alignItems: 'center', gap: space[3], paddingVertical: space[3] },

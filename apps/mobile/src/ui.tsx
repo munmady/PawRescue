@@ -7,7 +7,7 @@ import Animated, {
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
-  Ambulance, Cat, ChevronLeft, CircleCheck, Clock, Dog, EyeOff, Images, MapPinCheck, PawPrint, Route, Siren, type LucideIcon,
+  Ambulance, Cat, Check, ChevronLeft, CircleCheck, Clock, Dog, EyeOff, Images, MapPinCheck, PawPrint, Route, Siren, type LucideIcon,
 } from 'lucide-react-native';
 import { statusLabel, statusTone, type CaseLike, type Species, type StatusTone } from '@animal/shared';
 import { color, font, pastel, radius, shadow, space, toneColors, type, type PastelName } from './theme';
@@ -87,6 +87,15 @@ export function statusIcon(c: CaseLike): LucideIcon {
  * every status, tag and pill so labels look the same on every page.
  */
 export type TagTone = StatusTone | PastelName;
+/** Single-choice indicator: a thin empty circle, or a filled blue circle with a white check when selected. */
+export function SelectCheck({ selected }: { selected: boolean }) {
+  return (
+    <View style={[styles.selectCheck, selected && styles.selectCheckOn]}>
+      {selected ? <Animated.View entering={FadeIn.duration(150)}><Check size={14} color="#ffffff" strokeWidth={3} /></Animated.View> : null}
+    </View>
+  );
+}
+
 export function Tag({ label, tone = 'info', icon: Icon, lines = 2, style }: { label: string; tone?: TagTone; icon?: LucideIcon; lines?: number; style?: StyleProp<ViewStyle> }) {
   const t = tone in toneColors
     ? { bg: toneColors[tone as StatusTone].bg, fg: toneColors[tone as StatusTone].fg }
@@ -161,12 +170,12 @@ export function ScreenHeader({ title, right, onBack }: { title?: string; right?:
     <View style={styles.header}>
       <PressableScale
         onPress={onBack ?? (() => (router.canGoBack() ? router.back() : router.replace('/')))}
-        accessibilityLabel="Back" style={styles.iconBtn} scaleTo={0.9}
+        accessibilityLabel="Back" style={styles.iconBtn} scaleTo={0.9} hitSlop={8}
       >
-        <ChevronLeft size={24} color={color.ink} />
+        <ChevronLeft size={19} color={color.ink} strokeWidth={2.2} style={{ marginLeft: -1 }} />
       </PressableScale>
       <Text numberOfLines={1} style={[type.section, { flex: 1, textAlign: 'center' }]}>{title}</Text>
-      <View style={{ width: 44, alignItems: 'flex-end' }}>{right}</View>
+      <View style={{ width: 36, alignItems: 'flex-end' }}>{right}</View>
     </View>
   );
 }
@@ -271,6 +280,8 @@ export function FadeSlide({ children, k }: { children: ReactNode; k: string | nu
 }
 
 export const styles = StyleSheet.create({
+  selectCheck: { width: 24, height: 24, borderRadius: 12, borderWidth: 1.5, borderColor: color.line, backgroundColor: color.surface, alignItems: 'center', justifyContent: 'center' },
+  selectCheckOn: { borderColor: color.action, backgroundColor: color.action },
   tag: { flexDirection: 'row', alignItems: 'center', gap: 5, alignSelf: 'flex-start', maxWidth: '100%', paddingHorizontal: 10, paddingVertical: 4, borderRadius: radius.pill, overflow: 'hidden' },
   tagText: { fontFamily: font.bold, fontSize: 11.5, lineHeight: 15, flexShrink: 1 },
   btn: { minHeight: 50, borderRadius: radius.pill, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space[2], paddingHorizontal: space[5] },
@@ -284,8 +295,8 @@ export const styles = StyleSheet.create({
   glassDot: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.5)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.85)' },
   glassText: { fontFamily: font.bold, fontSize: 12, color: color.ink },
   blur: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(234,246,254,0.94)', alignItems: 'center', justifyContent: 'center', gap: 6 },
-  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: space[3], height: 56 },
-  iconBtn: { width: 44, height: 44, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center' },
+  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: space[5], height: 56 },
+  iconBtn: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', backgroundColor: '#ffffff', borderWidth: 1, borderColor: color.line, boxShadow: '0 2px 8px rgba(47,58,76,0.08)' },
   card: { backgroundColor: color.surface, borderRadius: radius.md, padding: space[4], ...shadow.card },
   modalRoot: { flex: 1, alignItems: 'center' },
   modalFrame: { flex: 1, width: '100%', maxWidth: 440, justifyContent: 'flex-end' },
