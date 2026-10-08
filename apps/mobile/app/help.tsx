@@ -2,7 +2,7 @@ import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { router } from 'expo-router';
-import { Baby, Car, ChevronRight, Droplets, HeartPulse, type LucideIcon } from 'lucide-react-native';
+import { Baby, Car, Check, ChevronRight, Droplets, HeartPulse, type LucideIcon } from 'lucide-react-native';
 import { GradientFill } from '@/src/PastelBackdrop';
 import { PROMO_PHOTOS } from '@/src/photos';
 import { StandaloneNavBar } from '@/src/BottomNav';
@@ -28,7 +28,14 @@ export default function Help() {
               <View style={[styles.icon, { backgroundColor: pastel[s.tone].bg }]}><s.icon size={18} color={pastel[s.tone].ink} /></View>
               <Text style={type.section}>{s.title}</Text>
             </View>
-            {s.items.map((t) => <Text key={t} style={[type.body, { color: color.ink }]}>• {t}</Text>)}
+            <View style={styles.list}>
+              {s.items.map((t) => (
+                <View key={t} style={styles.item}>
+                  <Check size={16} color={pastel[s.tone].ink} strokeWidth={2.6} style={{ marginTop: 3, marginLeft: 10 }} />
+                  <Text style={[type.body, styles.itemText]}>{t}</Text>
+                </View>
+              ))}
+            </View>
           </Animated.View>
         ))}
         <View style={styles.note}>
@@ -53,8 +60,12 @@ export default function Help() {
 }
 
 const styles = StyleSheet.create({
-  card: { backgroundColor: color.surface, borderRadius: radius.md, padding: space[4], gap: space[2], ...shadow.card },
-  head: { flexDirection: 'row', alignItems: 'center', gap: space[3], marginBottom: 4 },
+  card: { backgroundColor: color.surface, borderRadius: 20, padding: space[4], gap: space[3], borderWidth: 1, borderColor: color.line, ...shadow.card },
+  list: { gap: space[3] },
+  // Tick centred under the 36 px section icon (10 + 16/2 = 18), text lined up with the section title (36 + 12).
+  item: { flexDirection: 'row', alignItems: 'flex-start', gap: 22 },
+  itemText: { flex: 1, color: color.ink, lineHeight: 22 },
+  head: { flexDirection: 'row', alignItems: 'center', gap: space[3], paddingBottom: space[3], borderBottomWidth: 1, borderBottomColor: color.line },
   icon: { width: 36, height: 36, borderRadius: 18, backgroundColor: color.surfaceTint, alignItems: 'center', justifyContent: 'center' },
   note: { flexDirection: 'row', gap: space[2], backgroundColor: color.amberTint, borderRadius: radius.md, padding: space[3] },
   faqLink: { flexDirection: 'row', alignItems: 'center', gap: space[3], backgroundColor: 'transparent', borderRadius: radius.md, padding: space[4], overflow: 'hidden', boxShadow: '0 10px 24px rgba(188,67,13,0.30)' },
