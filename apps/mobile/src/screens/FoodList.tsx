@@ -2,9 +2,11 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { ChevronRight, Truck } from 'lucide-react-native';
-import { PressableScale, ScreenHeader, Tag } from '@/src/ui';
-import { timeAgo, useStore } from '@/src/store';
+import { CalendarDays, Check, ChevronRight, Plus, RotateCw, Truck } from 'lucide-react-native';
+import { Button, PressableScale, ScreenHeader, Tag } from '@/src/ui';
+import { EmptyPets } from '@/src/EmptyPets';
+import { PROMO_PHOTOS } from '@/src/photos';
+import { useStore } from '@/src/store';
 import { ProductArt } from '@/src/ProductArt';
 import { color, font, pastel, radius, shadow, space, type } from '@/src/theme';
 import { PastelBackdrop } from '@/src/PastelBackdrop';
@@ -14,6 +16,19 @@ import { ProfileButton } from '@/src/ProfileButton';
  * Food donations (D95, D104, D120, D124): product-based only.
  * `tab`: shown as the Donation tab (D139); `mine`: My food donations from Profile.
  */
+/** Made before today. */
+function isPast(at: number) {
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
+  return at < start.getTime();
+}
+
+/** e.g. "8 Oct 2026, 3:45 pm" */
+function donationDate(at: number) {
+  const d = new Date(at);
+  return `${d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}, ${d.toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit' })}`;
+}
+
 export function FoodList({ mine, tab }: { mine?: boolean; tab?: boolean }) {
   const insets = useSafeAreaInsets();
   const { foodRequests, donations } = useStore();
@@ -30,22 +45,40 @@ export function FoodList({ mine, tab }: { mine?: boolean; tab?: boolean }) {
         </View>
       ) : <ScreenHeader title={mine ? 'My food donations' : 'Food donations'} />}
       <ScrollView contentContainerStyle={{ padding: space[5], paddingTop: tab ? space[3] : space[5], gap: space[3], paddingBottom: tab ? 130 : space[8] }} showsVerticalScrollIndicator={false}>
+        {mine && donations.length > 0 ? <Button label="Donate food now" icon={Plus} variant="outline" onPress={() => router.navigate('/donations')} /> : null}
         {mine ? (
           donations.length === 0 ? (
-            <Text style={[type.label, { textAlign: 'center', marginTop: space[8] }]}>You haven&apos;t donated food yet.</Text>
+            <EmptyPets title="You haven’t donated food yet." image={PROMO_PHOTOS.emptyBowl}>
+              <Button label="Donate food now" icon={Plus} variant="outline" onPress={() => router.navigate('/donations')} />
+            </EmptyPets>
           ) : donations.map((d, i) => (
             <Animated.View key={d.id} entering={FadeInDown.delay(i * 50)} style={styles.card}>
               <View style={styles.row}>
                 <ProductArt kind={d.kind ?? 'dry-cat'} photo={d.photo} size={48} />
                 <View style={{ flex: 1 }}>
                   <Text style={type.section}>{d.product} × {d.quantity}</Text>
-                  <Text style={type.caption}>{d.org} · ₹{d.amount} · {timeAgo(d.at)}</Text>
+                  <Text style={type.caption}>{d.org} · ₹{d.amount}</Text>
+                  <View style={styles.dateRow}>
+                    <CalendarDays size={13} color={color.inkSecondary} />
+                    <Text style={type.caption}>{donationDate(d.at)}</Text>
+                  </View>
                 </View>
               </View>
               <View style={styles.statusRow}>
                 <Badge label={`Payment: ${d.payment}`} />
-                <Badge label={d.delivery} icon />
-                <Badge label="Open" />
+                {/* Past donations (before today) always read Delivered. */}
+                <Badge label={isPast(d.at) ? 'Delivered' : d.delivery} icon />
+              </View>
+              <View style={styles.footRow}>
+                <Text style={[type.caption, { flex: 1 }]}>Help again with the same order</Text>
+                <PressableScale onPress={() => {
+                const open = foodRequests.some((r) => r.id === d.requestId && r.status === 'Open');
+                if (open && d.productId) router.push({ pathname: '/food/[id]', params: { id: d.requestId, product: d.productId, qty: String(d.quantity) } });
+                else router.navigate('/donations');
+              }} accessibilityLabel="Repeat donation" style={styles.repeat} scaleTo={0.95}>
+                  <RotateCw size={14} color={color.action} strokeWidth={2.4} />
+                  <Text style={styles.repeatText}>Repeat</Text>
+                </PressableScale>
               </View>
             </Animated.View>
           ))
@@ -78,6 +111,7 @@ export function FoodList({ mine, tab }: { mine?: boolean; tab?: boolean }) {
 }
 
 function Badge({ label, icon }: { label: string; icon?: boolean }) {
+  if (label === 'Delivered') return <Tag label={label} tone="success" icon={Check} lines={1} />;
   return <Tag label={label} tone="info" icon={icon ? Truck : undefined} lines={1} />;
 }
 
@@ -87,5 +121,9 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: space[3] },
   packs: { flexDirection: 'row', flexWrap: 'wrap', gap: space[2] },
   pack: { flexBasis: '31%', flexGrow: 0, alignItems: 'center', gap: space[2], paddingVertical: space[3], paddingHorizontal: 2, borderRadius: radius.md, backgroundColor: '#ffffff', borderWidth: 1, borderColor: color.line, boxShadow: '0 4px 12px rgba(110, 130, 170, 0.10)' },
+  footRow: { flexDirection: 'row', alignItems: 'center', gap: space[3], borderTopWidth: 1, borderTopColor: color.line, paddingTop: space[3] },
+  repeat: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 36, paddingHorizontal: 14, borderRadius: radius.pill, backgroundColor: color.surface, borderWidth: 1, borderColor: color.line },
+  repeatText: { fontFamily: font.bold, fontSize: 13.5, color: color.action },
+  dateRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 },
   statusRow: { flexDirection: 'row', flexWrap: 'wrap', gap: space[2] },
 });

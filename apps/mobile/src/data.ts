@@ -97,8 +97,14 @@ export interface AdoptionListing {
   poster: string;
   status: 'Available' | 'Adopted';
   mine?: boolean;
-  /** Demo portrait (src/photos.ts). */
+  /** First name of the adopter, chosen by the poster when marking Adopted (D146). */
+  adopter?: string;
+  /** The signed-in user is the adopter: shown under "Adopted by you" (D146). */
+  adoptedByMe?: boolean;
+  /** Demo portrait (src/photos.ts); the first of `media` when the poster added photos. */
   photo?: AdoptionPhotoKey;
+  /** Up to 4 photos or videos added by the poster (D147). */
+  media?: { kind: 'photo' | 'video'; photo: AdoptionPhotoKey }[];
 }
 
 export interface FoodProduct {
@@ -125,6 +131,8 @@ export interface FoodRequest {
 export interface Donation {
   id: string;
   requestId: string;
+  /** The product chosen, so the donation can be repeated. */
+  productId?: string;
   org: string;
   product: string;
   /** Pack art for My food donations. */
@@ -226,7 +234,7 @@ export const ORGANISATIONS: Organisation[] = [
 export const ADOPTIONS: AdoptionListing[] = [
   { id: 'a1', name: 'Mishti', species: 'cat', age: '~4 months', gender: 'Female', area: 'Bandra West', description: 'Rescued from a construction site, now healthy and playful.', temperament: 'Friendly with people and other cats', vaccination: 'Partially vaccinated', requirements: 'Indoor home, one follow-up visit', poster: 'Neha', status: 'Available', photo: 'kitten-tabby' },
   { id: 'a2', name: 'Bruno', species: 'dog', age: '~2 years', gender: 'Male', area: 'Powai', description: 'Recovered from a leg injury. Calm and loves walks.', temperament: 'Gentle, good with children', vaccination: 'Vaccinated', requirements: 'Space for daily walks', poster: 'Lumen Animal Rescue & Shelter', status: 'Available', photo: 'dog-golden' },
-  { id: 'a3', species: 'dog', age: '~6 months', gender: 'Unknown', area: 'Marol', description: 'Shy puppy who warms up quickly.', temperament: 'Shy at first', vaccination: 'Unknown', requirements: 'Patient family', poster: 'Kabir', status: 'Adopted', photo: 'puppy-black-tan' },
+  { id: 'a3', species: 'dog', age: '~6 months', gender: 'Unknown', area: 'Marol', description: 'Shy puppy who warms up quickly.', temperament: 'Shy at first', vaccination: 'Unknown', requirements: 'Patient family', poster: 'Kabir', status: 'Adopted', photo: 'puppy-black-tan', adoptedByMe: true },
   { id: 'a4', name: 'Laddoo', species: 'cat', age: '~1 year', gender: 'Male', area: 'Andheri West', description: 'Found as a stray near a tea stall. Now relaxed and affectionate.', temperament: 'Calm, loves a warm lap', vaccination: 'Vaccinated', requirements: 'Indoor home', poster: 'Lumen Animal Rescue & Shelter', status: 'Available', photo: 'cat-orange' },
   { id: 'a5', name: 'Kaali', species: 'dog', age: '~1 year', gender: 'Female', area: 'Chakala', description: 'Cheerful and street-smart. Fully recovered from a skin infection.', temperament: 'Playful and energetic', vaccination: 'Vaccinated', requirements: 'Active family, secure gate', poster: 'Priya', status: 'Available', photo: 'dog-black' },
   { id: 'a6', name: 'Chutki', species: 'cat', age: '~3 months', gender: 'Female', area: 'Saki Naka', description: 'Bottle-fed after being found alone. Curious and confident.', temperament: 'Curious, gentle', vaccination: 'Partially vaccinated', requirements: 'Indoor home, one follow-up visit', poster: 'Lumen Animal Rescue & Shelter', status: 'Available', photo: 'kitten-calico' },

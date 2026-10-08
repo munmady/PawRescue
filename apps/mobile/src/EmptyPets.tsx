@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, View, type ImageSourcePropType } from 'react-native';
 import Animated, {
   Easing, FadeIn, useAnimatedStyle, useReducedMotion, useSharedValue, withDelay, withRepeat, withSequence, withTiming,
 } from 'react-native-reanimated';
@@ -14,9 +14,12 @@ const CAT = require('../assets/promo/report-cat.png');
  * Friendly empty state: the 3D dog and cat faces bobbing over a soft pastel disc,
  * with a few paw prints, above the (locked) message and an optional hint.
  */
-export function EmptyPets({ title, hint }: { title: string; hint?: string }) {
+export function EmptyPets({ title, hint, image, imageSize, children }: { title: string; hint?: string; image?: ImageSourcePropType; imageSize?: { width: number; height: number }; children?: React.ReactNode }) {
   return (
     <Animated.View entering={FadeIn.duration(350)} style={styles.wrap}>
+      {image ? (
+        <Bob delay={0} style={[styles.picture, imageSize]}><Image source={image} style={styles.img} resizeMode="contain" accessibilityIgnoresInvertColors /></Bob>
+      ) : (
       <View style={styles.art}>
         <View style={styles.disc}>
           <GradientFill colors={[pastel.sky.bg, pastel.mint.bg]} id="empty-pets-disc" />
@@ -27,8 +30,10 @@ export function EmptyPets({ title, hint }: { title: string; hint?: string }) {
         <Bob delay={0} style={[styles.face, styles.cat]}><Image source={CAT} style={styles.img} /></Bob>
         <Bob delay={600} style={[styles.face, styles.dog]}><Image source={DOG} style={styles.img} /></Bob>
       </View>
+      )}
       <Text style={[type.section, styles.center]}>{title}</Text>
       {hint ? <Text style={[type.label, styles.center, { maxWidth: 260 }]}>{hint}</Text> : null}
+      {children ? <View style={styles.action}>{children}</View> : null}
     </Animated.View>
   );
 }
@@ -54,6 +59,7 @@ function Bob({ delay, style, children }: { delay: number; style: object; childre
 
 const styles = StyleSheet.create({
   wrap: { alignItems: 'center', gap: space[2], marginTop: space[6], paddingHorizontal: space[4] },
+  picture: { width: 230, height: 164, marginBottom: space[2] },
   art: { width: 190, height: 150, marginBottom: space[2] },
   disc: { position: 'absolute', left: 25, top: 5, width: 140, height: 140, borderRadius: 70, overflow: 'hidden' },
   face: { position: 'absolute', width: 86, height: 86, borderRadius: 43, borderWidth: 4, borderColor: '#ffffff', overflow: 'hidden', boxShadow: '0 8px 18px rgba(47,58,76,0.16)' },
@@ -61,5 +67,6 @@ const styles = StyleSheet.create({
   dog: { right: 22, top: 30, transform: [{ rotate: '8deg' }] },
   img: { width: '100%', height: '100%' },
   paw: { position: 'absolute', opacity: 0.7 },
+  action: { alignSelf: 'stretch', marginTop: space[3] },
   center: { textAlign: 'center', color: color.ink },
 });

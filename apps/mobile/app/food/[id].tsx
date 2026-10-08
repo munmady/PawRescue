@@ -17,12 +17,13 @@ type Step = 'donate' | 'done';
  * quantity and pay, then the thank-you. Payment and delivery are SIMULATED DEMO.
  */
 export default function FoodRequest() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  // `product` and `qty` pre-select a repeat donation from My food donations.
+  const { id, product, qty: qtyParam } = useLocalSearchParams<{ id: string; product?: string; qty?: string }>();
   const insets = useSafeAreaInsets();
   const { foodRequests, requireAccount, donate } = useStore();
   const r = foodRequests.find((x) => x.id === id);
-  const [productId, setProductId] = useState<string | null>(null);
-  const [qty, setQty] = useState(1);
+  const [productId, setProductId] = useState<string | null>(product ?? null);
+  const [qty, setQty] = useState(() => Math.min(20, Math.max(1, Number(qtyParam) || 1)));
   const [step, setStep] = useState<Step>('donate');
   const [paying, setPaying] = useState(false);
   if (!r) return null;
@@ -33,7 +34,7 @@ export default function FoodRequest() {
     if (!p) return;
     setPaying(true);
     setTimeout(() => {
-      donate({ requestId: r.id, org: r.org, product: `${p.name} ${p.size}`, kind: p.kind, photo: p.photo, quantity: qty, amount: total });
+      donate({ requestId: r.id, productId: p.id, org: r.org, product: `${p.name} ${p.size}`, kind: p.kind, photo: p.photo, quantity: qty, amount: total });
       setPaying(false);
       setStep('done');
     }, 1100);

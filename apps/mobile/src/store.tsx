@@ -53,7 +53,8 @@ interface Store {
   retryMessage: (id: string) => void;
   donate: (d: Omit<Donation, 'id' | 'at' | 'payment' | 'delivery'>) => void;
   addListing: (l: Omit<AdoptionListing, 'id' | 'status' | 'mine' | 'poster'>) => void;
-  markAdopted: (id: string) => void;
+  /** Marks a listing Adopted; `adopter` is the person the poster chose from their chats (D146). */
+  markAdopted: (id: string, adopter?: string) => void;
   removeListing: (id: string) => void;
   adoptionChats: AdoptionMessage[];
   /** Returns false when the pre-send filter blocks the message (text stays in the composer). */
@@ -180,10 +181,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     donate: (d) => {
       const id = `d${seq.current++}`;
       setDonations((ds) => [{ ...d, id, at: Date.now(), payment: 'Paid', delivery: 'Order placed' }, ...ds]);
+      // SIMULATED DEMO delivery: out for delivery after 12 s, delivered after 40 s.
       setTimeout(() => setDonations((ds) => ds.map((x) => (x.id === id ? { ...x, delivery: 'Out for delivery' } : x))), 12000);
+      setTimeout(() => setDonations((ds) => ds.map((x) => (x.id === id ? { ...x, delivery: 'Delivered' } : x))), 40000);
     },
     addListing: (l) => { setAdoptions((a) => [{ ...l, id: `a${seq.current++}`, status: 'Available', mine: true, poster: account?.name.split(' ')[0] ?? 'You' }, ...a]); showToast('Listing published'); },
-    markAdopted: (id) => { setAdoptions((a) => a.map((x) => (x.id === id ? { ...x, status: 'Adopted' } : x))); showToast('Marked as adopted'); },
+    markAdopted: (id, adopter) => { setAdoptions((a) => a.map((x) => (x.id === id ? { ...x, status: 'Adopted', adopter } : x))); showToast('Marked as adopted'); },
     removeListing: (id) => { setAdoptions((a) => a.filter((x) => x.id !== id)); showToast('Listing removed'); },
     sendAdoptionMessage: (listingId, text) => {
       if (ABUSE.some((r) => r.test(text))) return false;

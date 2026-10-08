@@ -55,6 +55,11 @@ export const PROMO_PHOTOS = {
   safety: require('../assets/promo/safety-kit.jpg'),
   firstAidKit: require('../assets/promo/first-aid-kit-3d.png'),
   medicalCall: require('../assets/promo/medical-call-3d.png'),
+  basketFriends: require('../assets/promo/basket-friends.png'),
+  emptyBowl: require('../assets/promo/empty-bowl.png'),
+  womanCat: require('../assets/promo/woman-cat.png'),
+  rescueDocumentation: require('../assets/promo/rescue-documentation.png'),
+  pawBadge: require('../assets/promo/paw-badge.png'),
 } satisfies Record<string, ImageSourcePropType>;
 
 export function adoptionPhoto(a: { photo?: AdoptionPhotoKey }): ImageSourcePropType | undefined {

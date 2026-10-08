@@ -4,7 +4,8 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { ChevronRight } from 'lucide-react-native';
-import { casePhoto } from '@/src/photos';
+import { PROMO_PHOTOS, casePhoto } from '@/src/photos';
+import { EmptyPets } from '@/src/EmptyPets';
 import { AnimalPhoto, Pill, PressableScale, ScreenHeader, StatusChip } from '@/src/ui';
 import { timeAgo, useStore } from '@/src/store';
 import { color, radius, shadow, space, type } from '@/src/theme';
@@ -33,14 +34,21 @@ export default function MyReports() {
   return (
     <View style={{ flex: 1, backgroundColor: color.page, paddingTop: insets.top }}>
       <ScreenHeader title={title} />
+      {/* Taken to care is a short list: no All / Active / Closed filters there. */}
+      {show === 'transported' ? null : (
       <View style={styles.tabs}>
         <Pill label="All" selected={tab === 'all'} onPress={() => setTab('all')} />
         <Pill label="Active" selected={tab === 'active'} onPress={() => setTab('active')} />
         <Pill label="Closed" selected={tab === 'closed'} onPress={() => setTab('closed')} />
       </View>
+      )}
       <ScrollView contentContainerStyle={{ padding: space[5], gap: space[3] }}>
         {list.length === 0 ? (
-          <Text style={[type.label, { textAlign: 'center', marginTop: space[8] }]}>{empty}</Text>
+          show === 'transported'
+            ? <EmptyPets title={empty} image={PROMO_PHOTOS.womanCat} imageSize={{ width: 180, height: 186 }} />
+            : show === 'reported' && tab === 'all'
+              ? <EmptyPets title={empty} image={PROMO_PHOTOS.rescueDocumentation} imageSize={{ width: 240, height: 165 }} />
+              : <Text style={[type.label, { textAlign: 'center', marginTop: space[8] }]}>{empty}</Text>
         ) : list.map((c, i) => (
           <Animated.View key={c.id} entering={FadeInDown.delay(i * 50)}>
             <PressableScale onPress={() => router.push(`/case/${c.id}`)} accessibilityLabel={`Open ${c.title}`} style={styles.row}>
